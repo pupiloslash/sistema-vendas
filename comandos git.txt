@@ -1,0 +1,26 @@
+motivação:
+	- git hub para controle de versões do seu próprio projeto
+
+	- git hub para controle de acesso simultaneo para ambientes onde varias pessoas editam o mesmo arquivo
+		- resolução de confiltos (merge conflict)
+
+	git add <nome do arquivo> // adicionar novos arquivos ao branch principal
+	
+	git commit -m "descrição das alterações"
+
+	git push
+
+git pull specific commit
+
+	sha1: a70e7cf05728fd136553466ecbeeb0e861b2da55
+
+	git fetch origin a70e7cf05728fd136553466ecbeeb0e861b2da55
+	git checkout FETCH_HEAD	// at this point you enter in a detached HEAD state. It means that you are no longer on a branch.
+
+	git status //message of detached head. Cannot commit
+	
+	git commit -m "trying to commit older version already in present on branch"
+	//you cant commit the very same file you fecthed from a older commit
+	// you have either modify the file and add/commit normaly, our discard the file, reataching the head with the command:
+
+	git checkout master
