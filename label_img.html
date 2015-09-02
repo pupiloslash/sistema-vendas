@@ -1,0 +1,2325 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+    <meta charset="utf-8">
+	<script src="jquery-1.6.4.js"></script>
+	<script src="http://cdn.jquerytools.org/1.2.6/full/jquery.tools.min.js"></script>
+	<script src="jquery.csv-0.71.js"></script>
+	
+	
+
+	<link href="sheet.css" rel="stylesheet">	
+</head>
+
+<script>
+
+var rowsShown = 12; //colocar numero par
+var tableIndiceClicked = 0;
+var tableOverflow = false;
+
+var vetor;
+var produtoDisponivel;
+ 
+</script>
+
+<script>
+function CarregaTabela(){
+	$('#transacoes');
+            //var rowsShown = 12; //colocar numero par
+            var rowsTotal = $('#transacoes tbody tr').length;
+            var numPages = rowsTotal/rowsShown;
+			if( $('#paginacao').children().length == 0 || tableOverflow ==true ){
+			 $('#paginacao').children().remove();
+				for(i = 0;i < numPages;i++) {
+					var pageNum = i + 1;
+					$('#paginacao').append('<a href="#" rel="'+i+'">'+pageNum+'</a> ');
+				}
+				
+				tableOverflow ==false;
+			}
+            $('#transacoes tbody tr').hide();
+            $('#transacoes tbody tr').slice(0, rowsShown).show();
+			//$('#paginacao a[rel="' + tableIndiceClicked + '"]').addClass('active');
+            $('#paginacao a:first').addClass('active');
+				$('#paginacao a').bind('click', function(){ 
+					tableIndiceClicked = parseInt($(this)[0].getAttribute('rel'));	
+					$('#paginacao a').removeClass('active');
+					$(this).addClass('active');
+					var currPage = $(this).attr('rel');
+					var startItem = currPage * rowsShown;
+					var endItem = startItem + rowsShown;
+					$('#transacoes tbody tr').css('opacity','0.0').hide().slice(startItem, endItem).
+							css('display','table-row').animate({opacity:1}, 300);
+				});
+		
+}
+</script>
+
+<script>
+function RenderizaTabelaOnTheFly(){
+/*renderiza a tabela quando o menu é nevageado ou quando ocorre overflow na tabela por ex.*/
+$('#paginacao a').removeClass('active');
+var elClicado = $('#paginacao a[rel="' + tableIndiceClicked + '"]')
+elClicado.addClass('active');
+var currPage = $('#paginacao a[class="active"]').attr('rel')
+var startItem = currPage * rowsShown;
+var endItem = startItem + rowsShown;
+$('#transacoes tbody tr').css('opacity','0.0').hide().slice(startItem, endItem).
+	css('display','table-row').animate({opacity:1}, 300);					
+/*renderiza a tabela quando o menu é nevageado ou quando ocorre overflow na tabela por ex.*/
+
+$('#paginacao a:last').click(); //posiciona na nova seção criada na tabela
+}
+
+
+</script>
+
+<script>
+//salva um objeto no local storage do browser (originalmente só armazena string)
+Storage.prototype.setObj = function(key, obj) {
+    return this.setItem(key, JSON.stringify(obj))
+}
+Storage.prototype.getObj = function(key) {
+    return JSON.parse(this.getItem(key))
+}
+
+
+function SavePage(data, filename){
+
+    if(!data) {
+        console.error('Console.save: No data')
+        return;
+    }
+
+    if(!filename) filename = 'teste.html'
+
+    if(typeof data === "object"){
+        data = JSON.stringify(data, undefined, 4)
+    }
+
+    var blob = new Blob([data], {type: 'text/json'}),
+        e    = document.createEvent('MouseEvents'),
+        a    = document.createElement('a')
+
+    a.download = filename
+    a.href = window.URL.createObjectURL(blob)
+    a.dataset.downloadurl =  ['text/json', a.download, a.href].join(':')
+    e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
+    a.dispatchEvent(e)
+ }
+ 
+ function sleep(milliseconds) {
+  var start = new Date().getTime();
+  for (var i = 0; i < 1e7; i++) {
+    if ((new Date().getTime() - start) > milliseconds){
+      break;
+    }
+  }
+}
+</script>
+
+<script>
+function load(){
+	
+	
+	
+		a = $('tbody');
+		b = a.children()[1];
+		c = b.children[5];
+		d = c.getElementsByTagName('p');	
+		
+		RestauraDadosTabela();
+		
+		//restaura status do thumbnail: colorido ou nao
+		var produtoDisp = localStorage.getObj('produtoDisponivel');		
+		for(i=0; i<$('img').length; i++)
+		{
+			var el = $('img')[i];
+			if(produtoDisp[i] == "true")
+				el.classList.add("clicked");						
+		}
+				
+}
+
+function RestauraDadosTabela(){
+		var teste = localStorage.getObj(vetor);
+		a = $('tbody');
+		query = a.find('.mainInfo, .subrow');
+		
+		for(j=0; j<query.length; j++)	//linhas	a.children().length
+		{	
+			b = query[j]; 
+			//b = a.children()[j];		
+			if(j%2 != 0)
+			{
+				for (i=0; i<b.children.length; i++)	//colunas das linhas de indice impar
+				{
+					c = b.children[i];
+					d = c.getElementsByTagName('p');
+					d[0].innerHTML = teste[j][i];
+					//vetor.push(d[0].innerHTML);
+				}
+			}
+			else
+			{
+				for (i=0; i<b.children.length; i++)	//coluna das linhas de indice par
+				{
+					if(i==1){	//se está na coluna de 'Status'
+						el = $('.trocaStatus');
+						a = el[j/2];
+						value = teste[j][i];
+						b = a.parentNode.parentNode;
+						
+						switch (value){	
+							case "#":					
+									b.setAttribute("style", "background-color: #00ccff")	
+									a.value = value;
+								break;
+								
+							case "--":					
+									b.setAttribute("style", "background-color: #ffff99")	
+									a.value = value;
+								break;
+									break;
+							case "-":					
+									b.setAttribute("style", "background-color: #ff6666")
+									a.value = value;
+									break;		
+						}
+						
+					}
+					else if(i==2){
+						el = $('.trocaProduto');
+						a = el[j/2];
+						value = teste[j][i];
+						b = a.parentNode.parentNode;
+						a.value = value;
+					}
+					else if(i==3){
+						el = $('.trocaCaixa');
+						a = el[j/2];
+						value = teste[j][i];
+						b = a.parentNode.parentNode;
+						a.value = value;
+					}
+					else if(i==4){
+						el = $('.trocaAnuncio');
+						a = el[j/2];
+						value = teste[j][i];
+						b = a.parentNode.parentNode;
+						a.value = value;
+					}
+					else {
+					 c = b.children[i];
+					 c.innerHTML = teste[j][i];
+					//vetor.push(c.innerHTML);
+					}
+				}	
+			}
+		}
+}
+</script>
+
+
+<script>
+function close(){		
+		
+		MudaLink(this);
+
+		
+		
+		//guarda status do thumbnail: colorido ou nao.
+		var temp = [];
+		for(i=0; i<$('img').length; i++)
+		{
+			var el = $('img')[i];
+			
+			if(el.classList.contains('clicked'))
+				temp[i] = "true";
+			else	
+				temp[i] = "false"
+		}
+		localStorage.setObj('produtoDisponivel' , temp);
+		
+		//guarda as informações da tabela ao abrir o arquivo sistema.html
+		var vec = [];
+		vec = ExtraiInfoTabela();		
+		localStorage.setObj(vetor , vec);//d[0].innerHTML);
+		
+		//esconde todo o content antes de fechar para nao dar problema ao reabrir
+		$('#content div').each( function(index){this.style.display = "none";});
+		
+		//remove a paginação html residual, para ao reabrir nao ir acumulando
+		$('#paginacao a').each(function(){this.remove();});
+		
+		//salva o html em um documento novo sistema.html
+		var headerr = "<!DOCTYPE html><html lang='en'>";
+		var html = $('html').clone();
+		var htmlString = html.html();
+		var finalHTML =	headerr.concat(htmlString);
+		SavePage(finalHTML, "sistema.html");
+		sleep(1000);
+}
+</script>
+
+<script>
+function ExportaCSV(){
+
+	var string=""; 
+	var par = 2;
+	var vec = [];
+	
+	vec = ExtraiInfoTabela();
+	att = $('thead td')
+	
+	//extrai info do header (nome das colunas)
+	for(k=1; k< att.length; k++) //k=1 para tirar o combobox
+	{
+		string = string.concat(att[k].innerText +",");		
+	}
+	string = string.concat("\n")
+	
+	//extrai info das células da tabela
+	for(i=0; i<vec.length; i++)
+	{ 		
+			for(j=1; j<vec[i].length; j++){	
+				string = string.concat(vec[i][j] +",")	
+			} 
+			string = string.concat("\n")
+		
+	}
+
+	var textToWrite = string
+	var textFileAsBlob = new Blob([textToWrite], {type:'text/plain'});
+	var fileNameToSaveAs = "kralho2.csv";
+
+	var downloadLink = document.createElement("a");
+	downloadLink.download = fileNameToSaveAs;
+	downloadLink.innerHTML = "Download File";
+	if (window.webkitURL != null)
+	{
+		// Chrome allows the link to be clicked
+		// without actually adding it to the DOM.
+		downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
+	}
+	else
+	{
+		// Firefox requires the link to be added to the DOM
+		// before it can be clicked.
+		downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+		downloadLink.onclick = destroyClickedElement;
+		downloadLink.style.display = "none";
+		document.body.appendChild(downloadLink);
+	}
+downloadLink.click();
+
+}
+</script>
+
+<script>
+	function ImportaCSV(){
+	
+	var fileToLoad = document.getElementById("fileToLoad").files[0];
+
+	var fileReader = new FileReader();
+	fileReader.onload = function(fileLoadedEvent) 
+	{
+		var textFromFileLoaded = fileLoadedEvent.target.result;
+	};
+	fileReader.readAsText(fileToLoad, "UTF-8");
+	
+	fileReader.onloadend = function()
+	{
+		var data = $.csv.toObjects(fileReader.result)
+		
+		a = $('tbody');
+		query = a.find('.mainInfo, .subrow');
+		
+		for(j=0; j<query.length; j++)	//linhas	a.children().length
+		{
+			b = query[j]; 
+			//b = a.children()[j];		
+			if(j%2 != 0)
+			{
+				for (i=0; i<b.children.length; i++)	//colunas das linhas de indice impar
+				{
+					c = b.children[i];
+					d = c.getElementsByTagName('p');
+					//d[0].innerHTML = "";
+					switch(i) {
+						case 1:
+							d[0].innerHTML = data[j].Status;
+							break;
+						case 2: 
+							d[0].innerHTML = data[j].Produto;
+							break;
+						case 3: 
+							d[0].innerHTML = data[j].Caixa;	
+							break;		
+						case 4:
+							d[0].innerHTML = data[j].Anuncio;
+							break;
+						case 5:
+							d[0].innerHTML = data[j].Localidade;
+							break;
+						case 6: 
+							d[0].innerHTML = data[j].DataTransf;
+							break;
+						case 7: 
+							d[0].innerHTML = data[j].Rastreio;	
+							break;
+						case 8: 
+							d[0].innerHTML = data[j].Valor;
+							break;
+						case 9: 
+							d[0].innerHTML = data[j].Contato;
+							break;
+					//vetor.push(d[0].innerHTML);
+					}
+				}
+			}
+			else
+			{
+				for (i=0; i<b.children.length; i++)	//coluna das linhas de indice par
+				{	
+					if(i==1){	//se está na coluna de 'Status'
+						el = $('.trocaStatus');
+						a = el[j/2];
+						value = data[j].Status;
+						b = a.parentNode.parentNode;
+						
+						switch (value){	
+							case "#":					
+									b.setAttribute("style", "background-color: #00ccff")	
+									a.value = value;
+								break;
+								
+							case "--":					
+									b.setAttribute("style", "background-color: #ffff99")	
+									a.value = value;
+								break;
+									break;
+							case "-":					
+									b.setAttribute("style", "background-color: #ff6666")
+									a.value = value;
+									break;		
+						}
+						
+					}
+					else if(i==2){
+						el = $('.trocaProduto');
+						a = el[j/2];
+						value = data[j].Produto;
+						b = a.parentNode.parentNode;
+						a.value = data[j].Produto;
+					}
+					else if(i==3){
+						el = $('.trocaCaixa');
+						a = el[j/2];
+						value = data[j].Caixa;
+						b = a.parentNode.parentNode;
+						a.value = data[j].Caixa;
+					}
+					else if(i==4){
+						el = $('.trocaAnuncio');
+						a = el[j/2];
+						value = data[j].Anuncio;
+						b = a.parentNode.parentNode;
+						a.value = data[j].Anuncio;
+					}
+					else {
+					 c = b.children[i];
+					//vetor.push(c.innerHTML);
+						switch(i) {
+							case 5: 
+								c.innerHTML = data[j].Localidade;
+								break;
+							case 6: 
+								c.innerHTML = data[j].DataTransf;	
+								break;
+							case 7: 
+								c.innerHTML = data[j].Rastreio;
+								break;
+							case 8: 
+								c.innerHTML = data[j].Valor;
+								break;
+							case 9: 
+								c.innerHTML = data[j].Contato;
+								break;
+						//vetor.push(d[0].innerHTML);
+						}
+					}
+				}
+			}
+		}
+		$('#menuTransacoes').click()
+	}
+	
+}
+</script>
+
+
+<script>
+function ExtraiInfoTabela() {
+		a = $('tbody');
+		var vec = [];
+		for(j=0; j<a.children().length-1; j++)	//linhas (-1 para remover paginação ao final da tabela)
+		{	
+			b = a.children()[j];
+			
+			vec[j] = new Array(b.children.length);
+			
+			if(j%2 != 0)
+			{
+				for (i=0; i<b.children.length; i++)	//colunas das linhas de indice impar
+				{
+					c = b.children[i];
+					d = c.getElementsByTagName('p');
+					
+					if(i==0)
+						vec[j][i] = (j-1)/2;
+					else
+						vec[j][i] = d[0].innerHTML;
+						
+					//vetor.push(d[0].innerHTML);
+				}
+			}
+			else
+			{
+				for (i=0; i<b.children.length; i++)	//coluna das linhas de indice par
+				{
+					if(i==1){	//se está na coluna de 'Status'
+						listaComboBox = $('.trocaStatus');
+						vec[j][i] = listaComboBox[j/2].value;
+					}
+					else if(i==2){
+						listaComboBox = $('.trocaProduto');
+						vec[j][i] = listaComboBox[j/2].value;
+					}
+					else if(i==3){
+						listaComboBox = $('.trocaCaixa');
+						vec[j][i] = listaComboBox[j/2].value;
+					}
+					else if(i==4){
+						listaComboBox = $('.trocaAnuncio');
+						vec[j][i] = listaComboBox[j/2].value;
+					}
+
+					else{
+						c = b.children[i];
+						vec[j][i] = c.innerHTML;
+						//vetor.push(c.innerHTML);
+					}
+				}	
+			}
+		}
+		
+		return vec;
+}
+</script>
+
+<script>
+function diffImage(img) {
+	
+	if(img.classList.contains('clicked'))
+		img.classList.remove("clicked");
+	else	
+		img.classList.add("clicked");
+
+}
+</script>
+
+<script>
+function MudaLink(obj){
+	var el = document.getElementById('content')
+	
+	//deixa invisivel todos os itens do menu
+	for(i=0; i< el.childElementCount ; i++)	
+		el.children[i].style.display = "none";
+
+
+	switch (obj.innerText)
+	{
+		case "Transacoes":
+			var tt = document.getElementsByClassName('Transacoes');
+			if(tt[0].style.display !='inline')
+			{
+				CarregaTabela();	
+				RenderizaTabelaOnTheFly()
+				tt[0].style.display = "inline";	
+			}
+			break;
+		case "Respostas":
+			var tt = document.getElementsByClassName('Respostas');
+			if(tt[0].style.display !='inline')
+			{
+				tt[0].style.display = "inline";
+			}
+				
+			//{
+			//	$('#2').html('Here is my dynamic content').show().siblings('div').hide();
+			/*}else if($('#2').css('display')!='none')
+			{
+				$('#1').show().siblings('div').hide();
+			}*/
+	}	
+	
+}
+</script>
+
+
+<script>
+	function mudaCor()	{	
+		//alert('abc');
+		//var $target = $(event.target);							
+		//var value = $target.val();
+		
+		var el = $(event.target);
+		value = el[0].value;
+		
+		switch (value){	
+			case "#":
+				if( el.parent().parent().hasClass('mainInfo') )
+				{
+					var row = el.parent().parent();
+					row.css("background-color", "#00ccff");
+				}
+				break;
+			case "--":
+				if( el.parent().parent().hasClass('mainInfo') )
+					{
+						var row = el.parent().parent();
+						row.css("background-color", "#ffff99");
+					}
+					break;
+			case "-":
+				if( el.parent().parent().hasClass('mainInfo') )
+					{
+						var row = el.parent().parent();
+						row.css("background-color", "#ff6666");
+					}
+					break;			
+	}
+	}
+	
+</script>
+
+<script>
+function adicionaLinha(){
+
+ultimaPaginaAntes = parseInt($('#transacoes tbody tr').length/12)+1;
+
+var newRow = $('<tr class="mainInfo" style="display:none;"> <td class="rowCheck"> <input type="checkbox"> </td> <td class="tableStatus" onchange="mudaCor()">	<select class="trocaStatus"> <option value="#">#</option> <option value="--">--</option> <option value="-">-</option> </select>	</td> <td class="tableProduto" > <select class="trocaProduto"> <option value="CE5">CE5</option> <option value="CH1">CH1</option> <option value="CS3">CS3</option> <option value="DD7">DD7</option> <option value="DD6">DD6</option> <option value="DD3">DD3</option> <option value="TU3">TU3</option> <option value="TU2">TU2</option> <option value="PH3">PH3</option> <option value="EQ7">EQ7</option>  <option value="BD2">BD2</option> <option value="NS2">NS2</option> <option value="RC3">RC3</option> <option value="TS9">TS9</option>  <option value="TS808">TS808</option> <option value="535Q">535Q</option> <option value="GCB95">GCB95</option> <option value="ZW45">ZW45</option> <option value="FT">FT</option> <option value="FT-PRO">FT-PRO</option> <option value="GT2">GT2</option>  <option value="PHASE 90">phase 90</option> </select> </td> <td class="tableCaixa" > <select class="trocaCaixa"> <option value="sim">sim</option> <option value="nao">não</option> </select> </td><td class="tableAnuncio"><select class="trocaAnuncio"><option value=""> </option><option value="Gratis"> Gratis </option><option value="Diamante"> Diamante </option><option value="Prata"> Prata </option>	</select></td> <td>New Line</td><td>New Line</td><td>New Line</td> <td>New Line</td><td>New Line</td></tr> <tr class="subrow" style="display:none;"> <td  style="border:none;"><p>&nbsp;</p></td> <td  style="border:none;"><p>&nbsp;</p></td> <td  style="border:none;"><p>&nbsp;</p></td> 	<td  style="border:none;"><p>&nbsp;</p></td> <td  style="border:none;"><p>&nbsp;</p></td> <td class="styleSubrow"><p>Blah </p></td> <td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 	<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> </tr>');
+
+$('#transacoes').append(newRow);
+
+secaoSelecionada = $('#paginacao a[class="active"]');
+numSecaoSelecionada = (parseInt(secaoSelecionada[0].innerHTML))
+ultimaPaginaDepois = parseInt($('#transacoes tbody tr').length/12)+1;
+
+if(ultimaPaginaDepois != ultimaPaginaAntes )
+	tableOverflow = true;
+				
+if( numSecaoSelecionada == ultimaPaginaAntes )
+{
+	a =	$('.mainInfo:last');
+	b = $('.subrow:last');
+	a[0].style.display = "table-row";
+	b[0].style.display = "table-row";
+}
+
+CarregaTabela();
+RenderizaTabelaOnTheFly();
+$('.subrow:last').find("p").slideToggle();
+
+}
+</script>
+
+<script>
+function consolida(){ 
+	
+	listaCheckBoxes = $('.rowCheck')
+	var checkBoxPosition = 0;
+	var classTopExiste = false;
+	var classBottomExiste = false;
+	var rowsInMiddle = new Array();
+	
+	for(i=0; i<listaCheckBoxes.length; i++)
+	{
+		el = listaCheckBoxes[i];
+		cb = el.getElementsByTagName('input');
+		b = cb[0]
+		
+		if(b.checked && checkBoxPosition==0)
+		{
+			classTopExiste	= DesenhaLinha(classTopExiste, "top", ["top", "row"], " top row ");
+						
+			checkBoxPosition++;
+		}
+		
+		else if(!b.checked && checkBoxPosition!=0)
+		{
+			rowsInMiddle.push(i);
+			
+			classTopExiste	= DesenhaLinha(classTopExiste, "row", ["row"], " row ");
+			
+		}	
+		
+		else if(b.checked && checkBoxPosition!=0)
+		{
+			classTopExiste	= DesenhaLinha(classTopExiste, "bottom", ["bottom", "row"], " bottom row ");			
+			break;
+		}
+	}
+}
+
+</script>
+
+<script>
+	function AddItem(){
+	 
+		var itemName = $('#campo_produto').val();
+		var itemLink = $('#campo_link').val();
+		
+		//adiciona item no select "Produto"
+			selectList = document.getElementsByClassName('trocaProduto')
+			for(i=0; i<selectList.length; i++)
+			{
+				AdicionaOpcao(i);			
+			}
+
+			function AdicionaOpcao(indice)
+			{
+				selectList = document.getElementsByClassName('trocaProduto')
+				var option = document.createElement("option");
+
+				option.text = itemName;
+				selectEl = selectList[indice];
+				selectEl.add(option);
+			}
+			
+		//adiciona dinamica ao novo thumbnail (preto/branco)
+			
+		th = $('.img-list')
+
+		var element = '<li><img src="'+itemLink+'" width="70" height="50" onclick=diffImage(this) /><span class="text-content"><span>'+itemName+'</span>/span>/li>'
+		
+		th.append(element);
+	}
+</script>
+
+
+<script>
+function DesenhaLinha(flag, classeParaProcurar, classesParaRemover, classesParaAdicionar){
+			mainRowList = $('.mainInfo');
+			line = mainRowList[i];
+			
+			for(j=0; j<line.classList.length; j++)
+			{	
+				if(line.classList[j] == classeParaProcurar)
+				{
+					for(k=0; k<classesParaRemover.length; k++)						
+						line.classList.remove(classesParaRemover[k]);
+					flag = true;
+				}
+			}
+			
+			if(!flag)
+			{	
+				line.className += classesParaAdicionar;
+			}
+			return flag;
+			
+			
+}
+</script>
+
+<body onload="load()" onunload="close()" >
+
+<script>
+
+ 	$(document).ready(function() {
+	
+	///// Modal dialog Add Item /////	
+	var triggers = $(".modalInput").overlay({
+
+		  // some mask tweaks suitable for modal dialogs
+		  mask: {
+			color: '#ebecff',
+			loadSpeed: 200,
+			opacity: 0.9
+		  },
+
+		  closeOnClick: false
+		});
+  
+    $("#prompt form").submit(function(e) {
+			AddItem();
+			alert('items Adicionados');
+     
+	});
+	///// Modal dialog Add Item /////		
+		
+		
+		//tabela
+		$("td[colspan=8]").find("p").hide();
+		$(".subrow").find("p").hide();		
+			$("table").click(function(event) {
+				event.stopPropagation();
+				var $target = $(event.target);
+				
+				/*if ( $target.closest("td").attr("colspan") > 1 ) {
+				$target.slideUp();*/
+				if ( $target.parent().parent().hasClass('subrow')  ) {				
+					//$(".subrow").find("p").slideUp();
+					//$target.closest("tr").prev().find("td:first").html("+");
+				}  else {
+					$target.closest("tr").next().find("p").slideToggle();
+					/*
+					if ($target.closest("tr").find("td:first").html() == "+")
+						$target.closest("tr").find("td:first").html("-");
+					else
+						$target.closest("tr").find("td:first").html("+");   */             
+				}                    
+			});		
+	});
+	
+</script>
+
+
+
+<div id="header">
+	<ul class="menu">
+		<li onclick=MudaLink(this) > <a href="#">Respostas</a></li>
+		<li onclick=MudaLink(this) id="menuTransacoes"> <a href="#">Transacoes</a></li>
+		<li> <a href="#"> Vendas </a></li>
+	</ul>
+</div>
+
+<div id="nav">
+<ul class="img-list" >
+<h1 id="titulo"> BOSS </h1>
+	<li>
+		<img src="http://s13.postimg.org/lb0y0nrc7/thumbnail_ensemble_wh.jpg" 
+		width="70" height="50" onclick=diffImage(this) id="ce5" />
+		<span class="text-content"><span>CE-5</span></span>
+	</li>
+	
+	
+	<li>
+		<img src="http://s7.postimg.org/66ziu1p8b/thumbnail_super_chorus_wh.jpg" 
+		width="70" height="50" onclick=diffImage(this) id="ch1" />
+		<span class="text-content"><span>CH-1</span></span>
+	</li>
+	
+	
+	<li>
+		<img src="http://s10.postimg.org/6nzadxhqh/thumbnail_compressor_wh.jpg" 
+		width="70" height="50" onclick=diffImage(this) id="cs3" />
+		<span class="text-content"><span>CS-3</span></span>
+	</li>
+	
+	
+	<li>
+		<img src="http://s23.postimg.org/6uktgjs57/thumbnail_dd7_wh.jpg" 
+		width="70" height="50" onclick=diffImage(this) id="dd7" />
+		<span class="text-content"><span>DD-7</span></span>
+	</li>
+	
+	<li>
+		<img src="http://s8.postimg.org/95hao1xmt/tumbnail_dd6_wh.jpg"
+		width="70" height="50" onclick=diffImage(this) id="dd6" />
+		<span class="text-content"><span>DD-6</span></span>
+	</li>
+	
+	<li>
+		<img src="http://s14.postimg.org/s48t5tk4x/thumbnail_dd3_wh.jpg" 
+		width="70" height="50" onclick=diffImage(this) id="dd3" />
+		<span class="text-content"><span>DD-3</span></span>
+	</li>
+	
+	<li>
+		<img src="http://s4.postimg.org/dy8svplel/thumbnail_tu3_wh.jpg" 
+		width="70" height="50" onclick=diffImage(this) id="tu3" />
+		<span class="text-content"><span>TU-3</span></span>
+	</li>
+	
+	<li>
+		<img src="http://s9.postimg.org/fopexp8rj/thumbnail_tu2_wh.jpg"
+		width="70" height="50" onclick=diffImage(this) id="tu2" />
+		<span class="text-content"><span>TU-2</span></span>
+	</li>
+	
+	<li>
+		<img src="http://s21.postimg.org/ac9r5dqbr/thumbnail_ph3_wh.jpg" 
+		width="70" height="50" onclick=diffImage(this) id="ph3" />
+		<span class="text-content"><span>PH-3</span></span>
+	</li>
+	
+	<li>
+		<img src="http://s10.postimg.org/60t71i3u1/thumbnail_eq7_wh.jpg"
+		width="70" height="50" onclick=diffImage(this) id="eq7" />
+		<span class="text-content"><span>EQ-7</span></span>
+	</li>
+	
+	<li>
+		<img src="http://s27.postimg.org/c7ajfqimb/thumbnail_bd2_wh.jpg" 
+		width="70" height="50" onclick=diffImage(this) id="bd2" />
+		<span class="text-content"><span>BD-2</span></span>
+	</li>
+	
+	<li>
+		<img src="http://s8.postimg.org/68voxfj45/thumbnail_ns2_wh.jpg"
+		width="70" height="50" onclick=diffImage(this) id="ns2" />
+		<span class="text-content"><span>NS-2</span></span>
+	</li>
+	
+	<li>
+		<img src="http://s7.postimg.org/je51no1rv/thumbnail_rc3_wh.jpg" 
+		width="70" height="50" onclick=diffImage(this) id="rc3" />
+		<span class="text-content"><span>RC-3</span></span>
+	</li>
+	
+	<li>
+		<img src="http://s23.postimg.org/gu1x8ujiz/thumbnail_ts9dx_wh.jpg" width="70" height="50" onclick=diffImage(this) id="ts9dx" />
+		<span class="text-content"><span>TESTE</span></span>
+	</li>
+	
+	<h1 id="titulo"> OUTROS </h1>
+	
+	<li>
+		<img src="http://s12.postimg.org/oj7znk525/thumbnail_ts9_wh.jpg" 
+		width="70" height="50" onclick=diffImage(this) id="ts9" />
+		<span class="text-content"><span>TS-9</span></span>
+	</li>
+	
+	<li>
+		<img src="http://s30.postimg.org/pmji2w4n5/thumbnail_ts808_wh.jpg"
+		width="70" height="50" onclick=diffImage(this) id="ts808" />
+		<span class="text-content"><span>TS-808</span></span>
+	</li>
+	
+	
+	<li>
+		<img src="http://s28.postimg.org/vt05orenh/thumbnail_535q_wh.jpg"
+		width="70" height="50" onclick=diffImage(this) id="d535q" />
+		<span class="text-content"><span>535Q</span></span>
+	</li>
+	
+	<li>
+		<img src="http://s9.postimg.org/4zqvwsfxb/thumbnail_gcb95_wh.jpg"
+		width="70" height="50" onclick=diffImage(this) id="gcb95" />
+		<span class="text-content"><span>GCB95</span></span>
+	</li>
+	
+	<li>
+		<img src="http://s4.postimg.org/kbcchvaql/thumbnail_zakk_wh.jpg"
+		width="70" height="50" onclick=diffImage(this) id="zw45" />
+		<span class="text-content"><span>ZW45</span></span>
+	</li>
+	
+	<li>
+		<img src="http://s18.postimg.org/q18g4purd/thumbnail_ft_wh.jpg"
+		width="70" height="50" onclick=diffImage(this) id="ft" />
+		<span class="text-content"><span>FAST TRACK</span></span>
+	</li>
+	
+	<li>
+		<img src="http://s14.postimg.org/e1q5601td/thumbnail_ftpro_wh.jpg"
+		width="70" height="50" onclick=diffImage(this) id="ftpro" />
+		<span class="text-content"><span>FT PRO</span></span>
+	</li>
+	
+	<li>
+		<img src="http://s11.postimg.org/cdx21xm4z/thumbnail_gt2_wh.jpg"
+		width="70" height="50" onclick=diffImage(this) id="gt2" />
+		<span class="text-content"><span>GT-2</span></span>
+	</li>
+	<li>
+		<img src="http://s4.postimg.org/hdvsl9x2l/thumbnail_phase90_wh.jpg"
+		width="70" height="50" onclick=diffImage(this) id="phase90" />
+		<span class="text-content"><span>Phase 90</span></span>
+	</li>
+	
+	
+</ul>
+</div>
+
+<div id="content">
+	<div id="section" class="Respostas" style="display:none;">
+		<h1>Respostas</h1>
+		<p>
+		Olá, por PAC fica R$ [valor] com prazo de [dias] dias. Por SEDEX fica R$ [valor] prazo de [dias] dias. Se for dar o lance por favor, avisar antes... abraço!
+		</p>
+		<h1>Perguntas</h1>
+			<p>
+				Hi, its fully functional ? Can you do free shipping to Hawthorne, CA 90250  with payment via PayPal ? 
+			</p>
+			<p>
+				Hi, pedals are fully functional ? Can you ship it to Hawthorne, CA 90250  with payment via PayPal ? 
+			</p>
+			<p>
+				Hi, the guitar has been sold already ?lets do it for $500? Can you ship it to Hawthorne, CA 90250  with payment via PayPal ? 
+			</p>
+		<h1>Vendas Finalizadas</h1>
+			<p>
+				Fala cara, vi que o pedal [nome do pedal] lhe foi entregue hoje.
+				Chegou tudo certo ? Já testou o pedal? Caso esteja tudo nos conformes, peço a gentileza de qualificar nossa negociação no ML! Um Abraço.
+				
+					Att, Leandro Martins
+			</p>
+			
+	</div>
+
+	<div id="section" class="Transacoes" style="display:none;" >
+		<h1>Transações</h1>		
+		
+			<button type="button" onclick="adicionaLinha()"> adiciona linha </button>
+			<button type="button" onclick="consolida()"> Consolidação </button>
+			<button type="button" class="modalInput" rel="#prompt" onclick=""> 
+			Add Item </button>
+			<button type="button" onclick="ExportaCSV()"> Exporta CSV </button>
+			<input type="file" name="files[]" id="fileToLoad" />
+			<button type="button" onclick="ImportaCSV()"> Importa CSV </button>		
+			
+			<!--div id="pager" class="pager">
+					<form>
+						<img src="http://tablesorter.com/addons/pager/icons/first.png" class="first"/>
+						<img src="http://tablesorter.com/addons/pager/icons/prev.png" class="prev"/>
+						<input type="text" class="pagedisplay"/>
+						<img src="http://tablesorter.com/addons/pager/icons/next.png" class="next"/>
+						<img src="http://tablesorter.com/addons/pager/icons/last.png" class="last"/>
+						<select class="pagesize">
+							<option selected="selected"  value="10">10</option>
+							<option value="20">20</option>
+							<option value="30">30</option>
+							<option  value="40">40</option>
+						</select>
+					</form-->	
+				
+			<table id="transacoes" onload="function()" class="tablesorter">
+			
+				<thead class="tableHead">
+					<tr>
+						<td> </td>
+						<td> Status </td>
+						<td> Produto </td>
+						<td> Caixa </td>
+						<td> Anuncio </td>
+						<td> Localidade </td>
+						<td> DataTransf </td>
+						<td> Rastreio </td>
+						<td> Valor </td>
+						<td> Contato </td>
+					</tr>
+				</thead>
+				<tfoot>
+					
+				</tfoot>
+				
+				<tbody contenteditable>
+					
+					<tr class="mainInfo">
+						<td class="rowCheck"> <input type="checkbox"> </td>
+						<td class="tableStatus" onchange="mudaCor()">
+						<select class="trocaStatus">
+							  <option value="#">#</option>
+							  <option value="--">--</option>
+							  <option value="-">-</option>							 
+						</select>
+						</td>							
+						<td class="tableProduto" >
+						<select class="trocaProduto">
+							  <option value="CE5">CE5</option>
+							  <option value="CH1">CH1</option>
+							  <option value="CS3">CS3</option>
+							  <option value="DD7">DD7</option>
+							  <option value="DD6">DD6</option>
+							  <option value="DD3">DD3</option>
+							  <option value="TU3">TU3</option>
+							  <option value="TU2">TU2</option>
+							  <option value="PH3">PH3</option>
+							  <option value="EQ7">EQ7</option>
+							  <option value="BD2">BD2</option>
+							  <option value="NS2">NS2</option>
+							  <option value="RC3">RC3</option>
+							  <option value="TS9">TS9</option>
+							  <option value="TS808">TS808</option>
+							  <option value="535Q">535Q</option>
+							  <option value="GCB95">GCB95</option>
+							  <option value="ZW45">ZW45</option>
+							  <option value="FT">FT</option>
+							  <option value="FT-PRO">FT-PRO</option>
+							  <option value="GT2">GT2</option>
+							  <option value="PHASE 90">phase 90</option>						  
+						</select>
+						</td>
+						<td class="tableCaixa" >
+						<select class="trocaCaixa">
+							  <option value="sim">sim</option>
+							  <option value="nao">não</option>						 
+						</select>
+						</td>
+						<td class="tableAnuncio">
+							<select class="trocaAnuncio">
+								<option value=""> </option>
+								<option value="Gratis"> Gratis </option>
+								<option value="Diamante"> Diamante </option>
+								<option value="Prata"> Prata </option>
+							</select>
+						</td>
+						<td>Name</td><td>Name</td><td>Name</td>
+						<td>Name</td><td>Name</td></tr>		
+					<tr class="subrow">					
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td> 
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 		
+						</tr>							
+
+					<tr class="mainInfo">
+						<td class="rowCheck"> <input type="checkbox"> </td>
+						<td class="tableStatus" onchange="mudaCor()">
+						<select class="trocaStatus">
+							  <option value="#">#</option>
+							  <option value="--">--</option>
+							  <option value="-">-</option>							 
+						</select>
+						</td>							
+						<td class="tableProduto" >
+						<select class="trocaProduto">
+							  <option value="CE5">CE5</option>
+							  <option value="CH1">CH1</option>
+							  <option value="CS3">CS3</option>
+							  <option value="DD7">DD7</option>
+							  <option value="DD6">DD6</option>
+							  <option value="DD3">DD3</option>
+							  <option value="TU3">TU3</option>
+							  <option value="TU2">TU2</option>
+							  <option value="PH3">PH3</option>
+							  <option value="EQ7">EQ7</option>
+							  <option value="BD2">BD2</option>
+							  <option value="NS2">NS2</option>
+							  <option value="RC3">RC3</option>
+							  <option value="TS9">TS9</option>
+							  <option value="TS808">TS808</option>
+							  <option value="535Q">535Q</option>
+							  <option value="GCB95">GCB95</option>
+							  <option value="ZW45">ZW45</option>
+							  <option value="FT">FT</option>
+							  <option value="FT-PRO">FT-PRO</option>
+							  <option value="GT2">GT2</option>
+							  <option value="PHASE 90">phase 90</option>						  
+						</select>
+						</td>
+						<td class="tableCaixa" >
+						<select class="trocaCaixa">
+							  <option value="sim">sim</option>
+							  <option value="nao">não</option>						 
+						</select>
+						</td>
+						<td class="tableAnuncio">
+							<select class="trocaAnuncio">
+								<option value=""> </option>
+								<option value="Gratis"> Gratis </option>
+								<option value="Diamante"> Diamante </option>
+								<option value="Prata"> Prata </option>
+							</select>
+						</td>
+						<td>Name</td><td>Name</td><td>Name</td>
+						<td>Name</td><td>Name</td></tr>		
+					<tr class="subrow">					
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td> 
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 		
+						</tr>	
+
+					<tr class="mainInfo">
+						<td class="rowCheck"> <input type="checkbox"> </td>
+						<td class="tableStatus" onchange="mudaCor()">
+						<select class="trocaStatus">
+							  <option value="#">#</option>
+							  <option value="--">--</option>
+							  <option value="-">-</option>							 
+						</select>
+						</td>							
+						<td class="tableProduto" >
+						<select class="trocaProduto">
+							  <option value="CE5">CE5</option>
+							  <option value="CH1">CH1</option>
+							  <option value="CS3">CS3</option>
+							  <option value="DD7">DD7</option>
+							  <option value="DD6">DD6</option>
+							  <option value="DD3">DD3</option>
+							  <option value="TU3">TU3</option>
+							  <option value="TU2">TU2</option>
+							  <option value="PH3">PH3</option>
+							  <option value="EQ7">EQ7</option>
+							  <option value="BD2">BD2</option>
+							  <option value="NS2">NS2</option>
+							  <option value="RC3">RC3</option>
+							  <option value="TS9">TS9</option>
+							  <option value="TS808">TS808</option>
+							  <option value="535Q">535Q</option>
+							  <option value="GCB95">GCB95</option>
+							  <option value="ZW45">ZW45</option>
+							  <option value="FT">FT</option>
+							  <option value="FT-PRO">FT-PRO</option>
+							  <option value="GT2">GT2</option>
+							  <option value="PHASE 90">phase 90</option>						  
+						</select>
+						</td>
+						<td class="tableCaixa" >
+						<select class="trocaCaixa">
+							  <option value="sim">sim</option>
+							  <option value="nao">não</option>						 
+						</select>
+						</td>
+						<td class="tableAnuncio">
+							<select class="trocaAnuncio">
+								<option value=""> </option>
+								<option value="Gratis"> Gratis </option>
+								<option value="Diamante"> Diamante </option>
+								<option value="Prata"> Prata </option>
+							</select>
+						</td>
+						<td>Name</td><td>Name</td><td>Name</td>
+						<td>Name</td><td>Name</td></tr>		
+					<tr class="subrow">					
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td> 
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 		
+						</tr>		
+						
+					<tr class="mainInfo">
+						<td class="rowCheck"> <input type="checkbox"> </td>
+						<td class="tableStatus" onchange="mudaCor()">
+						<select class="trocaStatus">
+							  <option value="#">#</option>
+							  <option value="--">--</option>
+							  <option value="-">-</option>							 
+						</select>
+						</td>							
+						<td class="tableProduto" >
+						<select class="trocaProduto">
+							  <option value="CE5">CE5</option>
+							  <option value="CH1">CH1</option>
+							  <option value="CS3">CS3</option>
+							  <option value="DD7">DD7</option>
+							  <option value="DD6">DD6</option>
+							  <option value="DD3">DD3</option>
+							  <option value="TU3">TU3</option>
+							  <option value="TU2">TU2</option>
+							  <option value="PH3">PH3</option>
+							  <option value="EQ7">EQ7</option>
+							  <option value="BD2">BD2</option>
+							  <option value="NS2">NS2</option>
+							  <option value="RC3">RC3</option>
+							  <option value="TS9">TS9</option>
+							  <option value="TS808">TS808</option>
+							  <option value="535Q">535Q</option>
+							  <option value="GCB95">GCB95</option>
+							  <option value="ZW45">ZW45</option>
+							  <option value="FT">FT</option>
+							  <option value="FT-PRO">FT-PRO</option>
+							  <option value="GT2">GT2</option>
+							  <option value="PHASE 90">phase 90</option>						  
+						</select>
+						</td>
+						<td class="tableCaixa" >
+						<select class="trocaCaixa">
+							  <option value="sim">sim</option>
+							  <option value="nao">não</option>						 
+						</select>
+						</td>
+						<td class="tableAnuncio">
+							<select class="trocaAnuncio">
+								<option value=""> </option>
+								<option value="Gratis"> Gratis </option>
+								<option value="Diamante"> Diamante </option>
+								<option value="Prata"> Prata </option>
+							</select>
+						</td>
+						<td>Name</td><td>Name</td><td>Name</td>
+						<td>Name</td><td>Name</td></tr>		
+					<tr class="subrow">					
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td> 
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 		
+						</tr>
+						
+						
+						<tr class="mainInfo">
+						<td class="rowCheck"> <input type="checkbox"> </td>
+						<td class="tableStatus" onchange="mudaCor()">
+						<select class="trocaStatus">
+							  <option value="#">#</option>
+							  <option value="--">--</option>
+							  <option value="-">-</option>							 
+						</select>
+						</td>							
+						<td class="tableProduto" >
+						<select class="trocaProduto">
+							  <option value="CE5">CE5</option>
+							  <option value="CH1">CH1</option>
+							  <option value="CS3">CS3</option>
+							  <option value="DD7">DD7</option>
+							  <option value="DD6">DD6</option>
+							  <option value="DD3">DD3</option>
+							  <option value="TU3">TU3</option>
+							  <option value="TU2">TU2</option>
+							  <option value="PH3">PH3</option>
+							  <option value="EQ7">EQ7</option>
+							  <option value="BD2">BD2</option>
+							  <option value="NS2">NS2</option>
+							  <option value="RC3">RC3</option>
+							  <option value="TS9">TS9</option>
+							  <option value="TS808">TS808</option>
+							  <option value="535Q">535Q</option>
+							  <option value="GCB95">GCB95</option>
+							  <option value="ZW45">ZW45</option>
+							  <option value="FT">FT</option>
+							  <option value="FT-PRO">FT-PRO</option>
+							  <option value="GT2">GT2</option>
+							  <option value="PHASE 90">phase 90</option>						  
+						</select>
+						</td>
+						<td class="tableCaixa" >
+						<select class="trocaCaixa">
+							  <option value="sim">sim</option>
+							  <option value="nao">não</option>						 
+						</select>
+						</td>
+						<td class="tableAnuncio">
+							<select class="trocaAnuncio">
+								<option value=""> </option>
+								<option value="Gratis"> Gratis </option>
+								<option value="Diamante"> Diamante </option>
+								<option value="Prata"> Prata </option>
+							</select>
+						</td>
+						<td>Name</td><td>Name</td><td>Name</td>
+						<td>Name</td><td>Name</td></tr>		
+					<tr class="subrow">					
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td> 
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 		
+						</tr>
+						
+						
+						<tr class="mainInfo">
+						<td class="rowCheck"> <input type="checkbox"> </td>
+						<td class="tableStatus" onchange="mudaCor()">
+						<select class="trocaStatus">
+							  <option value="#">#</option>
+							  <option value="--">--</option>
+							  <option value="-">-</option>							 
+						</select>
+						</td>							
+						<td class="tableProduto" >
+						<select class="trocaProduto">
+							  <option value="CE5">CE5</option>
+							  <option value="CH1">CH1</option>
+							  <option value="CS3">CS3</option>
+							  <option value="DD7">DD7</option>
+							  <option value="DD6">DD6</option>
+							  <option value="DD3">DD3</option>
+							  <option value="TU3">TU3</option>
+							  <option value="TU2">TU2</option>
+							  <option value="PH3">PH3</option>
+							  <option value="EQ7">EQ7</option>
+							  <option value="BD2">BD2</option>
+							  <option value="NS2">NS2</option>
+							  <option value="RC3">RC3</option>
+							  <option value="TS9">TS9</option>
+							  <option value="TS808">TS808</option>
+							  <option value="535Q">535Q</option>
+							  <option value="GCB95">GCB95</option>
+							  <option value="ZW45">ZW45</option>
+							  <option value="FT">FT</option>
+							  <option value="FT-PRO">FT-PRO</option>
+							  <option value="GT2">GT2</option>
+							  <option value="PHASE 90">phase 90</option>						  
+						</select>
+						</td>
+						<td class="tableCaixa" >
+						<select class="trocaCaixa">
+							  <option value="sim">sim</option>
+							  <option value="nao">não</option>						 
+						</select>
+						</td>
+						<td class="tableAnuncio">
+							<select class="trocaAnuncio">
+								<option value=""> </option>
+								<option value="Gratis"> Gratis </option>
+								<option value="Diamante"> Diamante </option>
+								<option value="Prata"> Prata </option>
+							</select>
+						</td>
+						<td>Name</td><td>Name</td><td>Name</td>
+						<td>Name</td><td>Name</td></tr>		
+					<tr class="subrow">					
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td> 
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 		
+						</tr>
+						
+						<tr class="mainInfo">
+						<td class="rowCheck"> <input type="checkbox"> </td>
+						<td class="tableStatus" onchange="mudaCor()">
+						<select class="trocaStatus">
+							  <option value="#">#</option>
+							  <option value="--">--</option>
+							  <option value="-">-</option>							 
+						</select>
+						</td>							
+						<td class="tableProduto" >
+						<select class="trocaProduto">
+							  <option value="CE5">CE5</option>
+							  <option value="CH1">CH1</option>
+							  <option value="CS3">CS3</option>
+							  <option value="DD7">DD7</option>
+							  <option value="DD6">DD6</option>
+							  <option value="DD3">DD3</option>
+							  <option value="TU3">TU3</option>
+							  <option value="TU2">TU2</option>
+							  <option value="PH3">PH3</option>
+							  <option value="EQ7">EQ7</option>
+							  <option value="BD2">BD2</option>
+							  <option value="NS2">NS2</option>
+							  <option value="RC3">RC3</option>
+							  <option value="TS9">TS9</option>
+							  <option value="TS808">TS808</option>
+							  <option value="535Q">535Q</option>
+							  <option value="GCB95">GCB95</option>
+							  <option value="ZW45">ZW45</option>
+							  <option value="FT">FT</option>
+							  <option value="FT-PRO">FT-PRO</option>
+							  <option value="GT2">GT2</option>
+							  <option value="PHASE 90">phase 90</option>						  
+						</select>
+						</td>
+						<td class="tableCaixa" >
+						<select class="trocaCaixa">
+							  <option value="sim">sim</option>
+							  <option value="nao">não</option>						 
+						</select>
+						</td>
+						<td class="tableAnuncio">
+							<select class="trocaAnuncio">
+								<option value=""> </option>
+								<option value="Gratis"> Gratis </option>
+								<option value="Diamante"> Diamante </option>
+								<option value="Prata"> Prata </option>
+							</select>
+						</td>
+						<td>Name</td><td>Name</td><td>Name</td>
+						<td>Name</td><td>Name</td></tr>		
+					<tr class="subrow">					
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td> 
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 		
+						</tr>
+						
+						<tr class="mainInfo">
+						<td class="rowCheck"> <input type="checkbox"> </td>
+						<td class="tableStatus" onchange="mudaCor()">
+						<select class="trocaStatus">
+							  <option value="#">#</option>
+							  <option value="--">--</option>
+							  <option value="-">-</option>							 
+						</select>
+						</td>							
+						<td class="tableProduto" >
+						<select class="trocaProduto">
+							  <option value="CE5">CE5</option>
+							  <option value="CH1">CH1</option>
+							  <option value="CS3">CS3</option>
+							  <option value="DD7">DD7</option>
+							  <option value="DD6">DD6</option>
+							  <option value="DD3">DD3</option>
+							  <option value="TU3">TU3</option>
+							  <option value="TU2">TU2</option>
+							  <option value="PH3">PH3</option>
+							  <option value="EQ7">EQ7</option>
+							  <option value="BD2">BD2</option>
+							  <option value="NS2">NS2</option>
+							  <option value="RC3">RC3</option>
+							  <option value="TS9">TS9</option>
+							  <option value="TS808">TS808</option>
+							  <option value="535Q">535Q</option>
+							  <option value="GCB95">GCB95</option>
+							  <option value="ZW45">ZW45</option>
+							  <option value="FT">FT</option>
+							  <option value="FT-PRO">FT-PRO</option>
+							  <option value="GT2">GT2</option>
+							  <option value="PHASE 90">phase 90</option>						  
+						</select>
+						</td>
+						<td class="tableCaixa" >
+						<select class="trocaCaixa">
+							  <option value="sim">sim</option>
+							  <option value="nao">não</option>						 
+						</select>
+						</td>
+						<td class="tableAnuncio">
+							<select class="trocaAnuncio">
+								<option value=""> </option>
+								<option value="Gratis"> Gratis </option>
+								<option value="Diamante"> Diamante </option>
+								<option value="Prata"> Prata </option>
+							</select>
+						</td>
+						<td>Name</td><td>Name</td><td>Name</td>
+						<td>Name</td><td>Name</td></tr>		
+					<tr class="subrow">					
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td> 
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 		
+						</tr>
+						
+						
+						<tr class="mainInfo">
+						<td class="rowCheck"> <input type="checkbox"> </td>
+						<td class="tableStatus" onchange="mudaCor()">
+						<select class="trocaStatus">
+							  <option value="#">#</option>
+							  <option value="--">--</option>
+							  <option value="-">-</option>							 
+						</select>
+						</td>							
+						<td class="tableProduto" >
+						<select class="trocaProduto">
+							  <option value="CE5">CE5</option>
+							  <option value="CH1">CH1</option>
+							  <option value="CS3">CS3</option>
+							  <option value="DD7">DD7</option>
+							  <option value="DD6">DD6</option>
+							  <option value="DD3">DD3</option>
+							  <option value="TU3">TU3</option>
+							  <option value="TU2">TU2</option>
+							  <option value="PH3">PH3</option>
+							  <option value="EQ7">EQ7</option>
+							  <option value="BD2">BD2</option>
+							  <option value="NS2">NS2</option>
+							  <option value="RC3">RC3</option>
+							  <option value="TS9">TS9</option>
+							  <option value="TS808">TS808</option>
+							  <option value="535Q">535Q</option>
+							  <option value="GCB95">GCB95</option>
+							  <option value="ZW45">ZW45</option>
+							  <option value="FT">FT</option>
+							  <option value="FT-PRO">FT-PRO</option>
+							  <option value="GT2">GT2</option>
+							  <option value="PHASE 90">phase 90</option>						  
+						</select>
+						</td>
+						<td class="tableCaixa" >
+						<select class="trocaCaixa">
+							  <option value="sim">sim</option>
+							  <option value="nao">não</option>						 
+						</select>
+						</td>
+						<td class="tableAnuncio">
+							<select class="trocaAnuncio">
+								<option value=""> </option>
+								<option value="Gratis"> Gratis </option>
+								<option value="Diamante"> Diamante </option>
+								<option value="Prata"> Prata </option>
+							</select>
+						</td>
+						<td>Name</td><td>Name</td><td>Name</td>
+						<td>Name</td><td>Name</td></tr>		
+					<tr class="subrow">					
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td> 
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 		
+						</tr>
+						
+						
+						<tr class="mainInfo">
+						<td class="rowCheck"> <input type="checkbox"> </td>
+						<td class="tableStatus" onchange="mudaCor()">
+						<select class="trocaStatus">
+							  <option value="#">#</option>
+							  <option value="--">--</option>
+							  <option value="-">-</option>							 
+						</select>
+						</td>							
+						<td class="tableProduto" >
+						<select class="trocaProduto">
+							  <option value="CE5">CE5</option>
+							  <option value="CH1">CH1</option>
+							  <option value="CS3">CS3</option>
+							  <option value="DD7">DD7</option>
+							  <option value="DD6">DD6</option>
+							  <option value="DD3">DD3</option>
+							  <option value="TU3">TU3</option>
+							  <option value="TU2">TU2</option>
+							  <option value="PH3">PH3</option>
+							  <option value="EQ7">EQ7</option>
+							  <option value="BD2">BD2</option>
+							  <option value="NS2">NS2</option>
+							  <option value="RC3">RC3</option>
+							  <option value="TS9">TS9</option>
+							  <option value="TS808">TS808</option>
+							  <option value="535Q">535Q</option>
+							  <option value="GCB95">GCB95</option>
+							  <option value="ZW45">ZW45</option>
+							  <option value="FT">FT</option>
+							  <option value="FT-PRO">FT-PRO</option>
+							  <option value="GT2">GT2</option>
+							  <option value="PHASE 90">phase 90</option>						  
+						</select>
+						</td>
+						<td class="tableCaixa" >
+						<select class="trocaCaixa">
+							  <option value="sim">sim</option>
+							  <option value="nao">não</option>						 
+						</select>
+						</td>
+						<td class="tableAnuncio">
+							<select class="trocaAnuncio">
+								<option value=""> </option>
+								<option value="Gratis"> Gratis </option>
+								<option value="Diamante"> Diamante </option>
+								<option value="Prata"> Prata </option>
+							</select>
+						</td>
+						<td>Name</td><td>Name</td><td>Name</td>
+						<td>Name</td><td>Name</td></tr>		
+					<tr class="subrow">					
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td> 
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 		
+						</tr>
+						
+						
+						<tr class="mainInfo">
+						<td class="rowCheck"> <input type="checkbox"> </td>
+						<td class="tableStatus" onchange="mudaCor()">
+						<select class="trocaStatus">
+							  <option value="#">#</option>
+							  <option value="--">--</option>
+							  <option value="-">-</option>							 
+						</select>
+						</td>							
+						<td class="tableProduto" >
+						<select class="trocaProduto">
+							  <option value="CE5">CE5</option>
+							  <option value="CH1">CH1</option>
+							  <option value="CS3">CS3</option>
+							  <option value="DD7">DD7</option>
+							  <option value="DD6">DD6</option>
+							  <option value="DD3">DD3</option>
+							  <option value="TU3">TU3</option>
+							  <option value="TU2">TU2</option>
+							  <option value="PH3">PH3</option>
+							  <option value="EQ7">EQ7</option>
+							  <option value="BD2">BD2</option>
+							  <option value="NS2">NS2</option>
+							  <option value="RC3">RC3</option>
+							  <option value="TS9">TS9</option>
+							  <option value="TS808">TS808</option>
+							  <option value="535Q">535Q</option>
+							  <option value="GCB95">GCB95</option>
+							  <option value="ZW45">ZW45</option>
+							  <option value="FT">FT</option>
+							  <option value="FT-PRO">FT-PRO</option>
+							  <option value="GT2">GT2</option>
+							  <option value="PHASE 90">phase 90</option>						  
+						</select>
+						</td>
+						<td class="tableCaixa" >
+						<select class="trocaCaixa">
+							  <option value="sim">sim</option>
+							  <option value="nao">não</option>						 
+						</select>
+						</td>
+						<td class="tableAnuncio">
+							<select class="trocaAnuncio">
+								<option value=""> </option>
+								<option value="Gratis"> Gratis </option>
+								<option value="Diamante"> Diamante </option>
+								<option value="Prata"> Prata </option>
+							</select>
+						</td>
+						<td>Name</td><td>Name</td><td>Name</td>
+						<td>Name</td><td>Name</td></tr>		
+					<tr class="subrow">					
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td> 
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 		
+						</tr>
+						
+						
+						<tr class="mainInfo">
+						<td class="rowCheck"> <input type="checkbox"> </td>
+						<td class="tableStatus" onchange="mudaCor()">
+						<select class="trocaStatus">
+							  <option value="#">#</option>
+							  <option value="--">--</option>
+							  <option value="-">-</option>							 
+						</select>
+						</td>							
+						<td class="tableProduto" >
+						<select class="trocaProduto">
+							  <option value="CE5">CE5</option>
+							  <option value="CH1">CH1</option>
+							  <option value="CS3">CS3</option>
+							  <option value="DD7">DD7</option>
+							  <option value="DD6">DD6</option>
+							  <option value="DD3">DD3</option>
+							  <option value="TU3">TU3</option>
+							  <option value="TU2">TU2</option>
+							  <option value="PH3">PH3</option>
+							  <option value="EQ7">EQ7</option>
+							  <option value="BD2">BD2</option>
+							  <option value="NS2">NS2</option>
+							  <option value="RC3">RC3</option>
+							  <option value="TS9">TS9</option>
+							  <option value="TS808">TS808</option>
+							  <option value="535Q">535Q</option>
+							  <option value="GCB95">GCB95</option>
+							  <option value="ZW45">ZW45</option>
+							  <option value="FT">FT</option>
+							  <option value="FT-PRO">FT-PRO</option>
+							  <option value="GT2">GT2</option>
+							  <option value="PHASE 90">phase 90</option>						  
+						</select>
+						</td>
+						<td class="tableCaixa" >
+						<select class="trocaCaixa">
+							  <option value="sim">sim</option>
+							  <option value="nao">não</option>						 
+						</select>
+						</td>
+						<td class="tableAnuncio">
+							<select class="trocaAnuncio">
+								<option value=""> </option>
+								<option value="Gratis"> Gratis </option>
+								<option value="Diamante"> Diamante </option>
+								<option value="Prata"> Prata </option>
+							</select>
+						</td>
+						<td>Name</td><td>Name</td><td>Name</td>
+						<td>Name</td><td>Name</td></tr>		
+					<tr class="subrow">					
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td> 
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 		
+						</tr>
+						
+						
+						<tr class="mainInfo">
+						<td class="rowCheck"> <input type="checkbox"> </td>
+						<td class="tableStatus" onchange="mudaCor()">
+						<select class="trocaStatus">
+							  <option value="#">#</option>
+							  <option value="--">--</option>
+							  <option value="-">-</option>							 
+						</select>
+						</td>							
+						<td class="tableProduto" >
+						<select class="trocaProduto">
+							  <option value="CE5">CE5</option>
+							  <option value="CH1">CH1</option>
+							  <option value="CS3">CS3</option>
+							  <option value="DD7">DD7</option>
+							  <option value="DD6">DD6</option>
+							  <option value="DD3">DD3</option>
+							  <option value="TU3">TU3</option>
+							  <option value="TU2">TU2</option>
+							  <option value="PH3">PH3</option>
+							  <option value="EQ7">EQ7</option>
+							  <option value="BD2">BD2</option>
+							  <option value="NS2">NS2</option>
+							  <option value="RC3">RC3</option>
+							  <option value="TS9">TS9</option>
+							  <option value="TS808">TS808</option>
+							  <option value="535Q">535Q</option>
+							  <option value="GCB95">GCB95</option>
+							  <option value="ZW45">ZW45</option>
+							  <option value="FT">FT</option>
+							  <option value="FT-PRO">FT-PRO</option>
+							  <option value="GT2">GT2</option>
+							  <option value="PHASE 90">phase 90</option>						  
+						</select>
+						</td>
+						<td class="tableCaixa" >
+						<select class="trocaCaixa">
+							  <option value="sim">sim</option>
+							  <option value="nao">não</option>						 
+						</select>
+						</td>
+						<td class="tableAnuncio">
+							<select class="trocaAnuncio">
+								<option value=""> </option>
+								<option value="Gratis"> Gratis </option>
+								<option value="Diamante"> Diamante </option>
+								<option value="Prata"> Prata </option>
+							</select>
+						</td>
+						<td>Name</td><td>Name</td><td>Name</td>
+						<td>Name</td><td>Name</td></tr>		
+					<tr class="subrow">					
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td> 
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 		
+						</tr>
+						
+						
+						<tr class="mainInfo">
+						<td class="rowCheck"> <input type="checkbox"> </td>
+						<td class="tableStatus" onchange="mudaCor()">
+						<select class="trocaStatus">
+							  <option value="#">#</option>
+							  <option value="--">--</option>
+							  <option value="-">-</option>							 
+						</select>
+						</td>							
+						<td class="tableProduto" >
+						<select class="trocaProduto">
+							  <option value="CE5">CE5</option>
+							  <option value="CH1">CH1</option>
+							  <option value="CS3">CS3</option>
+							  <option value="DD7">DD7</option>
+							  <option value="DD6">DD6</option>
+							  <option value="DD3">DD3</option>
+							  <option value="TU3">TU3</option>
+							  <option value="TU2">TU2</option>
+							  <option value="PH3">PH3</option>
+							  <option value="EQ7">EQ7</option>
+							  <option value="BD2">BD2</option>
+							  <option value="NS2">NS2</option>
+							  <option value="RC3">RC3</option>
+							  <option value="TS9">TS9</option>
+							  <option value="TS808">TS808</option>
+							  <option value="535Q">535Q</option>
+							  <option value="GCB95">GCB95</option>
+							  <option value="ZW45">ZW45</option>
+							  <option value="FT">FT</option>
+							  <option value="FT-PRO">FT-PRO</option>
+							  <option value="GT2">GT2</option>
+							  <option value="PHASE 90">phase 90</option>						  
+						</select>
+						</td>
+						<td class="tableCaixa" >
+						<select class="trocaCaixa">
+							  <option value="sim">sim</option>
+							  <option value="nao">não</option>						 
+						</select>
+						</td>
+						<td class="tableAnuncio">
+							<select class="trocaAnuncio">
+								<option value=""> </option>
+								<option value="Gratis"> Gratis </option>
+								<option value="Diamante"> Diamante </option>
+								<option value="Prata"> Prata </option>
+							</select>
+						</td>
+						<td>Name</td><td>Name</td><td>Name</td>
+						<td>Name</td><td>Name</td></tr>		
+					<tr class="subrow">					
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td> 
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 		
+						</tr>
+						
+						
+						<tr class="mainInfo">
+						<td class="rowCheck"> <input type="checkbox"> </td>
+						<td class="tableStatus" onchange="mudaCor()">
+						<select class="trocaStatus">
+							  <option value="#">#</option>
+							  <option value="--">--</option>
+							  <option value="-">-</option>							 
+						</select>
+						</td>							
+						<td class="tableProduto" >
+						<select class="trocaProduto">
+							  <option value="CE5">CE5</option>
+							  <option value="CH1">CH1</option>
+							  <option value="CS3">CS3</option>
+							  <option value="DD7">DD7</option>
+							  <option value="DD6">DD6</option>
+							  <option value="DD3">DD3</option>
+							  <option value="TU3">TU3</option>
+							  <option value="TU2">TU2</option>
+							  <option value="PH3">PH3</option>
+							  <option value="EQ7">EQ7</option>
+							  <option value="BD2">BD2</option>
+							  <option value="NS2">NS2</option>
+							  <option value="RC3">RC3</option>
+							  <option value="TS9">TS9</option>
+							  <option value="TS808">TS808</option>
+							  <option value="535Q">535Q</option>
+							  <option value="GCB95">GCB95</option>
+							  <option value="ZW45">ZW45</option>
+							  <option value="FT">FT</option>
+							  <option value="FT-PRO">FT-PRO</option>
+							  <option value="GT2">GT2</option>
+							  <option value="PHASE 90">phase 90</option>						  
+						</select>
+						</td>
+						<td class="tableCaixa" >
+						<select class="trocaCaixa">
+							  <option value="sim">sim</option>
+							  <option value="nao">não</option>						 
+						</select>
+						</td>
+						<td class="tableAnuncio">
+							<select class="trocaAnuncio">
+								<option value=""> </option>
+								<option value="Gratis"> Gratis </option>
+								<option value="Diamante"> Diamante </option>
+								<option value="Prata"> Prata </option>
+							</select>
+						</td>
+						<td>Name</td><td>Name</td><td>Name</td>
+						<td>Name</td><td>Name</td></tr>		
+					<tr class="subrow">					
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td> 
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 		
+						</tr>
+						
+						<tr class="mainInfo">
+						<td class="rowCheck"> <input type="checkbox"> </td>
+						<td class="tableStatus" onchange="mudaCor()">
+						<select class="trocaStatus">
+							  <option value="#">#</option>
+							  <option value="--">--</option>
+							  <option value="-">-</option>							 
+						</select>
+						</td>							
+						<td class="tableProduto" >
+						<select class="trocaProduto">
+							  <option value="CE5">CE5</option>
+							  <option value="CH1">CH1</option>
+							  <option value="CS3">CS3</option>
+							  <option value="DD7">DD7</option>
+							  <option value="DD6">DD6</option>
+							  <option value="DD3">DD3</option>
+							  <option value="TU3">TU3</option>
+							  <option value="TU2">TU2</option>
+							  <option value="PH3">PH3</option>
+							  <option value="EQ7">EQ7</option>
+							  <option value="BD2">BD2</option>
+							  <option value="NS2">NS2</option>
+							  <option value="RC3">RC3</option>
+							  <option value="TS9">TS9</option>
+							  <option value="TS808">TS808</option>
+							  <option value="535Q">535Q</option>
+							  <option value="GCB95">GCB95</option>
+							  <option value="ZW45">ZW45</option>
+							  <option value="FT">FT</option>
+							  <option value="FT-PRO">FT-PRO</option>
+							  <option value="GT2">GT2</option>
+							  <option value="PHASE 90">phase 90</option>						  
+						</select>
+						</td>
+						<td class="tableCaixa" >
+						<select class="trocaCaixa">
+							  <option value="sim">sim</option>
+							  <option value="nao">não</option>						 
+						</select>
+						</td>
+						<td class="tableAnuncio">
+							<select class="trocaAnuncio">
+								<option value=""> </option>
+								<option value="Gratis"> Gratis </option>
+								<option value="Diamante"> Diamante </option>
+								<option value="Prata"> Prata </option>
+							</select>
+						</td>
+						<td>Name</td><td>Name</td><td>Name</td>
+						<td>Name</td><td>Name</td></tr>		
+					<tr class="subrow">					
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td> 
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 		
+						</tr>
+						
+						
+						<tr class="mainInfo">
+						<td class="rowCheck"> <input type="checkbox"> </td>
+						<td class="tableStatus" onchange="mudaCor()">
+						<select class="trocaStatus">
+							  <option value="#">#</option>
+							  <option value="--">--</option>
+							  <option value="-">-</option>							 
+						</select>
+						</td>							
+						<td class="tableProduto" >
+						<select class="trocaProduto">
+							  <option value="CE5">CE5</option>
+							  <option value="CH1">CH1</option>
+							  <option value="CS3">CS3</option>
+							  <option value="DD7">DD7</option>
+							  <option value="DD6">DD6</option>
+							  <option value="DD3">DD3</option>
+							  <option value="TU3">TU3</option>
+							  <option value="TU2">TU2</option>
+							  <option value="PH3">PH3</option>
+							  <option value="EQ7">EQ7</option>
+							  <option value="BD2">BD2</option>
+							  <option value="NS2">NS2</option>
+							  <option value="RC3">RC3</option>
+							  <option value="TS9">TS9</option>
+							  <option value="TS808">TS808</option>
+							  <option value="535Q">535Q</option>
+							  <option value="GCB95">GCB95</option>
+							  <option value="ZW45">ZW45</option>
+							  <option value="FT">FT</option>
+							  <option value="FT-PRO">FT-PRO</option>
+							  <option value="GT2">GT2</option>
+							  <option value="PHASE 90">phase 90</option>						  
+						</select>
+						</td>
+						<td class="tableCaixa" >
+						<select class="trocaCaixa">
+							  <option value="sim">sim</option>
+							  <option value="nao">não</option>						 
+						</select>
+						</td>
+						<td class="tableAnuncio">
+							<select class="trocaAnuncio">
+								<option value=""> </option>
+								<option value="Gratis"> Gratis </option>
+								<option value="Diamante"> Diamante </option>
+								<option value="Prata"> Prata </option>
+							</select>
+						</td>
+						<td>Name</td><td>Name</td><td>Name</td>
+						<td>Name</td><td>Name</td></tr>		
+					<tr class="subrow">					
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td> 
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 		
+						</tr>
+						
+						
+						<tr class="mainInfo">
+						<td class="rowCheck"> <input type="checkbox"> </td>
+						<td class="tableStatus" onchange="mudaCor()">
+						<select class="trocaStatus">
+							  <option value="#">#</option>
+							  <option value="--">--</option>
+							  <option value="-">-</option>							 
+						</select>
+						</td>							
+						<td class="tableProduto" >
+						<select class="trocaProduto">
+							  <option value="CE5">CE5</option>
+							  <option value="CH1">CH1</option>
+							  <option value="CS3">CS3</option>
+							  <option value="DD7">DD7</option>
+							  <option value="DD6">DD6</option>
+							  <option value="DD3">DD3</option>
+							  <option value="TU3">TU3</option>
+							  <option value="TU2">TU2</option>
+							  <option value="PH3">PH3</option>
+							  <option value="EQ7">EQ7</option>
+							  <option value="BD2">BD2</option>
+							  <option value="NS2">NS2</option>
+							  <option value="RC3">RC3</option>
+							  <option value="TS9">TS9</option>
+							  <option value="TS808">TS808</option>
+							  <option value="535Q">535Q</option>
+							  <option value="GCB95">GCB95</option>
+							  <option value="ZW45">ZW45</option>
+							  <option value="FT">FT</option>
+							  <option value="FT-PRO">FT-PRO</option>
+							  <option value="GT2">GT2</option>
+							  <option value="PHASE 90">phase 90</option>						  
+						</select>
+						</td>
+						<td class="tableCaixa" >
+						<select class="trocaCaixa">
+							  <option value="sim">sim</option>
+							  <option value="nao">não</option>						 
+						</select>
+						</td>
+						<td class="tableAnuncio">
+							<select class="trocaAnuncio">
+								<option value=""> </option>
+								<option value="Gratis"> Gratis </option>
+								<option value="Diamante"> Diamante </option>
+								<option value="Prata"> Prata </option>
+							</select>
+						</td>
+						<td>Name</td><td>Name</td><td>Name</td>
+						<td>Name</td><td>Name</td></tr>		
+					<tr class="subrow">					
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td> 
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 		
+						</tr>
+						
+						
+						<tr class="mainInfo">
+						<td class="rowCheck"> <input type="checkbox"> </td>
+						<td class="tableStatus" onchange="mudaCor()">
+						<select class="trocaStatus">
+							  <option value="#">#</option>
+							  <option value="--">--</option>
+							  <option value="-">-</option>							 
+						</select>
+						</td>							
+						<td class="tableProduto" >
+						<select class="trocaProduto">
+							  <option value="CE5">CE5</option>
+							  <option value="CH1">CH1</option>
+							  <option value="CS3">CS3</option>
+							  <option value="DD7">DD7</option>
+							  <option value="DD6">DD6</option>
+							  <option value="DD3">DD3</option>
+							  <option value="TU3">TU3</option>
+							  <option value="TU2">TU2</option>
+							  <option value="PH3">PH3</option>
+							  <option value="EQ7">EQ7</option>
+							  <option value="BD2">BD2</option>
+							  <option value="NS2">NS2</option>
+							  <option value="RC3">RC3</option>
+							  <option value="TS9">TS9</option>
+							  <option value="TS808">TS808</option>
+							  <option value="535Q">535Q</option>
+							  <option value="GCB95">GCB95</option>
+							  <option value="ZW45">ZW45</option>
+							  <option value="FT">FT</option>
+							  <option value="FT-PRO">FT-PRO</option>
+							  <option value="GT2">GT2</option>
+							  <option value="PHASE 90">phase 90</option>						  
+						</select>
+						</td>
+						<td class="tableCaixa" >
+						<select class="trocaCaixa">
+							  <option value="sim">sim</option>
+							  <option value="nao">não</option>						 
+						</select>
+						</td>
+						<td class="tableAnuncio">
+							<select class="trocaAnuncio">
+								<option value=""> </option>
+								<option value="Gratis"> Gratis </option>
+								<option value="Diamante"> Diamante </option>
+								<option value="Prata"> Prata </option>
+							</select>
+						</td>
+						<td>Name</td><td>Name</td><td>Name</td>
+						<td>Name</td><td>Name</td></tr>		
+					<tr class="subrow">					
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td> 
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 		
+						</tr>
+						
+						
+						<tr class="mainInfo">
+						<td class="rowCheck"> <input type="checkbox"> </td>
+						<td class="tableStatus" onchange="mudaCor()">
+						<select class="trocaStatus">
+							  <option value="#">#</option>
+							  <option value="--">--</option>
+							  <option value="-">-</option>							 
+						</select>
+						</td>							
+						<td class="tableProduto" >
+						<select class="trocaProduto">
+							  <option value="CE5">CE5</option>
+							  <option value="CH1">CH1</option>
+							  <option value="CS3">CS3</option>
+							  <option value="DD7">DD7</option>
+							  <option value="DD6">DD6</option>
+							  <option value="DD3">DD3</option>
+							  <option value="TU3">TU3</option>
+							  <option value="TU2">TU2</option>
+							  <option value="PH3">PH3</option>
+							  <option value="EQ7">EQ7</option>
+							  <option value="BD2">BD2</option>
+							  <option value="NS2">NS2</option>
+							  <option value="RC3">RC3</option>
+							  <option value="TS9">TS9</option>
+							  <option value="TS808">TS808</option>
+							  <option value="535Q">535Q</option>
+							  <option value="GCB95">GCB95</option>
+							  <option value="ZW45">ZW45</option>
+							  <option value="FT">FT</option>
+							  <option value="FT-PRO">FT-PRO</option>
+							  <option value="GT2">GT2</option>
+							  <option value="PHASE 90">phase 90</option>						  
+						</select>
+						</td>
+						<td class="tableCaixa" >
+						<select class="trocaCaixa">
+							  <option value="sim">sim</option>
+							  <option value="nao">não</option>						 
+						</select>
+						</td>
+						<td class="tableAnuncio">
+							<select class="trocaAnuncio">
+								<option value=""> </option>
+								<option value="Gratis"> Gratis </option>
+								<option value="Diamante"> Diamante </option>
+								<option value="Prata"> Prata </option>
+							</select>
+						</td>
+						<td>Name</td><td>Name</td><td>Name</td>
+						<td>Name</td><td>Name</td></tr>		
+					<tr class="subrow">					
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td> 
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 		
+						</tr>
+					
+					
+					<!--tr class="mainInfo"><td class="tableStatus">#</td><td>Name</td><td>Age</td>
+					<td>Name</td><td>Name</td><td>Name</td>
+					<td>Name</td><td>Name</td></tr>		
+						<tr class="subrow">					
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td  style="border:none;"><p>&nbsp;</p></td> 
+							<td  style="border:none;"><p>&nbsp;</p></td>
+							<td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 
+							<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 		
+						</tr-->		
+				
+					
+				</tbody>
+			</table>
+			<table>
+				<tbody>
+					<tr id="paginacao"> </tr>
+				</tbody>
+			</table>
+</div>
+
+	</div>
+</div>
+
+<div class="modal" id="prompt">
+  <h2>Adicionar produtos ao sistema</h2>
+
+  <p>
+	Entre com: 	<br> - nome do produto (vai aparecer no select): ex. "TS9DX" <br> - id do produto: ex. "ts9dx"
+	<br>- link da imagem em wh & bk	
+  </p>
+
+  <!-- input form. you can press enter too -->
+  <form>
+    Produto :<input type="text" id="campo_produto"><br>
+	Link thumbnail	:<input type="text" id="campo_link"><br>
+	
+    <button type="submit"> OK </button>
+    <button type="button" class="close"> Cancel </button>
+  </form>
+  <br />
+
+</div>
+
+<div id="footer">
+Copyright © pupilovai
+</div>
+
+</body>
