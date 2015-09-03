@@ -1,0 +1,241 @@
+ul.img-list {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+ 
+ul.img-list li {
+  display: inline-block;
+  height: 50px;
+  margin: 0 1em 1em 0;
+  position: relative;
+  width: 70px;
+  border: 4px solid green;
+}
+
+span.text-content {
+  background: rgba(0,0,0,0.5);
+  color: white;
+  cursor: pointer;
+  display: table;
+  height: 50px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 70px;
+}
+ 
+span.text-content span {
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+  
+}
+
+span.text-content {
+  background: rgba(0,0,0,0.5);
+  color: white;
+  cursor: pointer;
+  display: table;
+  height: 50px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 70px;
+  opacity: 0;
+}
+ 
+ul.img-list li:hover span.text-content {
+  opacity: 1;
+}
+
+ul.img-list li:visited span.text-content {
+  opacity: 0;
+}
+
+span.text-content {
+  background: rgba(0,0,0,0.5);
+  color: white;
+  cursor: pointer;
+  display: table;
+  height: 10px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 70px;
+  opacity: 0;
+  -webkit-transition: opacity 500ms;
+  -moz-transition: opacity 500ms;
+  -o-transition: opacity 500ms;
+  transition: opacity 500ms;
+}
+
+
+/*
+input[type="checkbox"] {
+    content: url('http://mlb-s1-p.mlstatic.com/pedal-boss-compression-sustainer-cs-3-744401-MLB20324957208_062015-F.jpg');
+    display: block;
+    width: 100px;
+    height: 100px;
+}
+input[type="checkbox"]:checked {
+    content: url('http://placekitten.com/150/100');
+}
+.native-hidden {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+*/
+
+body {
+background-image: url("http://devlup.com/wp-content/uploads/2011/12/ios5-texture.png");
+}
+
+html, body{
+height:100%;
+}
+
+#header {
+    background-color:rgba(0,0,0,0.5);
+    color:white;
+    text-align:center;
+    padding:1px;
+}
+#nav {
+    
+    border: 5px solid rgba(0,230, 30,0.2);
+    width:300px;
+    float:left;
+    
+}
+#section {
+	
+    width:900px;
+	height: 700px;
+    float:left;
+    padding:10px; 
+	color: white;
+}
+#footer {
+    position: fixed;
+    height: 20px;
+    background-color: rgba(0,0,0,0.5);
+    color: #999;
+    bottom: 0;
+    width: 100%;
+    padding-top: 0.5%;
+    text-align: center;
+}
+
+ul.menu li {
+	display: inline;
+	background-color: rgba(210, 60, 100, 0.3);
+	padding: 10px;
+	border: 1px solid black;
+	-webkit-transition: all 0.2s linear;
+	
+}
+
+ul.menu li:hover {
+	font-size: 20px;
+	
+}
+
+a {
+text-decoration: none;
+color: white;
+
+}
+
+h1#titulo{
+background-color: rgba(0,230, 30,0.2);
+}
+
+table{ width: 80%; }
+tr {border: 2px solid #AEAEAE;}
+td { border: 2px solid #AEAEAE; }
+
+.tableHead{
+background-color: rgba(255,30,40,0.5); /*cor dos atributos */
+}
+
+.mainInfo{
+font-size : 77%;
+  font-family : "Myriad Web",Verdana,Helvetica,Arial,sans-serif;
+  background : #efe none; color : #630;
+}
+
+.tableStatus{
+	text-align: center;
+	width:10%;
+}
+
+.styleSubrow{
+background-color: rgba(20,30,40,0.5);
+}
+
+tr:hover {
+background-color: rgba(255,255,0,0.3);
+}
+
+tr.top td { border-top: 4px dotted black; }
+tr.bottom td { border-bottom: 4px dotted black; }
+tr.row td:first-child { border-left: 4px dotted black; }
+tr.row td:last-child { border-right: 4px dotted black; }
+
+
+#paginacao a:hover{
+font-size: 40px;
+}
+
+#paginacao a{
+font-size: 30px;
+-webkit-transition: all 0.2s linear;
+}
+
+#paginacao a:active{
+color: blue;
+font-size: 100px;
+}
+
+#paginacao a.active{
+color: blue;
+}
+/* add item */
+.modal {
+    background-color:#fff;
+    display:none;
+    width:350px;
+    padding:15px;
+    text-align:left;
+    border:2px solid #333;
+
+    opacity:0.8;
+    -moz-border-radius:6px;
+    -webkit-border-radius:6px;
+    -moz-box-shadow: 0 0 50px #ccc;
+    -webkit-box-shadow: 0 0 50px #ccc;
+  }
+
+  .modal h2 {
+    background: 0 50% no-repeat;
+    margin:0px;
+    padding:10px 0 10px 45px;
+    border-bottom:1px solid #333;
+    font-size:20px;
+  }
+  
+ /* thumbnail color/black white */
+img {
+  filter: gray; /* IE6-9 */
+  filter: grayscale(1); /* Firefox 35+ */
+  -webkit-filter: grayscale(1); /* Google Chrome, Safari 6+ & Opera 15+ */
+}
+
+/* Disable grayscale on hover */
+img.clicked {
+  filter: none;
+  -webkit-filter: grayscale(0);
+}
