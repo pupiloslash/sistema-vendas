@@ -32,3 +32,4 @@ git pull specific commit
 	git checkout master
 
 
+//restaura a versao local pelo ultimo commit
