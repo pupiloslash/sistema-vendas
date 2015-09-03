@@ -26,6 +26,9 @@ git pull specific commit
 	//descarta modificações no modo head detached
 	git reset --hard
 	
+	//salva as alterações do branch recuperado e modificado 
+	git branch <new-branch-name> 2066c6d (número do branch nao salvo)
+
 	git checkout master
 
 
