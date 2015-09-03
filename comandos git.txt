@@ -22,5 +22,10 @@ git pull specific commit
 	git commit -m "trying to commit older version already in present on branch"
 	//you cant commit the very same file you fecthed from a older commit
 	// you have either modify the file and add/commit normaly, our discard the file, reataching the head with the command:
-
+	
+	//descarta modificações no modo head detached
+	git reset --hard
+	
 	git checkout master
+
+
