@@ -12,24 +12,28 @@ motivação:
 
 git pull specific commit
 
-	sha1: a70e7cf05728fd136553466ecbeeb0e861b2da55
+	sha1: a70e7cf05728fd136553466ecbeeb0e861b2da55 //unique identifyer for each commit
 
 	git fetch origin a70e7cf05728fd136553466ecbeeb0e861b2da55
-	git checkout FETCH_HEAD	// at this point you enter in a detached HEAD state. It means that you are no longer on a branch.
+	git checkout FETCH_HEAD	// at this point you entered in a detached HEAD state. It means that you are no longer on a branch. The head is pointing to the desired old commit, and is detached in the sense that is not possible modify and commit this restored version on the same branch.
 
 	git status //message of detached head. Cannot commit
 	
 	git commit -m "trying to commit older version already in present on branch"
-	//you cant commit the very same file you fecthed from a older commit
+	//you can not commit the very same file you fecthed from a older commit
 	// you have either modify the file and add/commit normaly, our discard the file, reataching the head with the command:
 	
-	//descarta modificações no modo head detached
-	git reset --hard
+	//descarta modificações no modo head detached, restaurando a versao local pelo ultimo commit
+		git checkout master
+		//git reset --hard
 	
-	//salva as alterações do branch recuperado e modificado 
-	git branch <new-branch-name> 2066c6d (número do branch nao salvo)
+	//salva as alterações do commit recuperado e modificado 
+	git checkout -b <nome-do-branch>
+	git push --all //para atualizar no github o novo branch
 
-	git checkout master
+	
 
 
-//restaura a versao local pelo ultimo commit
+//comandos uteis
+
+git branch //informa o branch acoplado no momento
