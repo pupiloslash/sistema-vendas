@@ -609,7 +609,26 @@ function adicionaLinha(){
 
 ultimaPaginaAntes = parseInt($('#transacoes tbody tr').length/12)+1;
 
-var newRow = $('<tr class="mainInfo" style="display:none;"> <td class="rowCheck"> <input type="checkbox"> </td> <td class="tableStatus" onchange="mudaCor()">	<select class="trocaStatus"> <option value="#">#</option> <option value="--">--</option> <option value="-">-</option> </select>	</td> <td class="tableProduto" > <select class="trocaProduto"> <option value="CE5">CE5</option> <option value="CH1">CH1</option> <option value="CS3">CS3</option> <option value="DD7">DD7</option> <option value="DD6">DD6</option> <option value="DD3">DD3</option> <option value="TU3">TU3</option> <option value="TU2">TU2</option> <option value="PH3">PH3</option> <option value="EQ7">EQ7</option>  <option value="BD2">BD2</option> <option value="NS2">NS2</option> <option value="RC3">RC3</option> <option value="TS9">TS9</option>  <option value="TS808">TS808</option> <option value="535Q">535Q</option> <option value="GCB95">GCB95</option> <option value="ZW45">ZW45</option> <option value="FT">FT</option> <option value="FT-PRO">FT-PRO</option> <option value="GT2">GT2</option>  <option value="PHASE 90">phase 90</option> </select> </td> <td class="tableCaixa" > <select class="trocaCaixa"> <option value="sim">sim</option> <option value="nao">não</option> </select> </td><td class="tableAnuncio"><select class="trocaAnuncio"><option value=""> </option><option value="Gratis"> Gratis </option><option value="Diamante"> Diamante </option><option value="Prata"> Prata </option>	</select></td> <td>New Line</td><td>New Line</td><td>New Line</td> <td>New Line</td><td>New Line</td></tr> <tr class="subrow" style="display:none;"> <td  style="border:none;"><p>&nbsp;</p></td> <td  style="border:none;"><p>&nbsp;</p></td> <td  style="border:none;"><p>&nbsp;</p></td> 	<td  style="border:none;"><p>&nbsp;</p></td> <td  style="border:none;"><p>&nbsp;</p></td> <td class="styleSubrow"><p>Blah </p></td> <td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 	<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> </tr>');
+var part1='<tr class="mainInfo" style="display:none;"> <td class="rowCheck"> <input type="checkbox"> </td> <td class="tableStatus" onchange="mudaCor()">	<select class="trocaStatus"> <option value="#">#</option> <option value="--">--</option> <option value="-">-</option> </select>	</td> <td class="tableProduto" > <select class="trocaProduto"> ' 
+
+selectWithOptions = $('.trocaProduto')[0]
+
+selectWithOptions.options.length
+
+for(i=0; i<selectWithOptions.options.length; i++)
+{
+	codeSnippet = '<option value="'+selectWithOptions.options[i].value+'">'+selectWithOptions.options[i].value+'</option>'
+	
+	part1 = part1.concat(codeSnippet);
+	//console.log(selectWithOptions.options[i].value)
+
+}
+
+var part2='</td> <td class="tableCaixa" > <select class="trocaCaixa"> <option value="sim">sim</option> <option value="nao">não</option> </select> </td><td class="tableAnuncio"><select class="trocaAnuncio"><option value=""> </option><option value="Gratis"> Gratis </option><option value="Diamante"> Diamante </option><option value="Prata"> Prata </option>	</select></td> <td>New Line</td><td>New Line</td><td>New Line</td> <td>New Line</td><td>New Line</td></tr> <tr class="subrow" style="display:none;"> <td  style="border:none;"><p>&nbsp;</p></td> <td  style="border:none;"><p>&nbsp;</p></td> <td  style="border:none;"><p>&nbsp;</p></td> 	<td  style="border:none;"><p>&nbsp;</p></td> <td  style="border:none;"><p>&nbsp;</p></td> <td class="styleSubrow"><p>Blah </p></td> <td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> 	<td class="styleSubrow"><p>Blah </p></td><td class="styleSubrow"><p>Blah </p></td> </tr>'
+
+var novaLinha = part1+part2;
+
+var newRow = $(novaLinha);
 
 $('#transacoes').append(newRow);
 
@@ -674,6 +693,7 @@ function consolida(){
 }
 
 </script>
+
 
 <script>
 	function AddItem(){
