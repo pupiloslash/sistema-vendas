@@ -239,3 +239,39 @@ img.clicked {
   filter: none;
   -webkit-filter: grayscale(0);
 }
+
+/* tabela relatorio */
+#sumario-vendas body {
+  font: normal medium/1.4 verdana;
+
+}
+#sumario-vendas th{
+  border-collapse: collapse;
+  font-size: 20px;
+  width: 70%;
+}
+#sumario-vendas th, td {
+  padding: 0.4rem;
+  text-align: left;
+  border: 0.3px solid #ccc;
+}
+#sumario-vendas tbody tr:nth-child(odd) {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+
+/*tabela resultado-relatorio */
+
+#resultado-relatorio {
+	background: rgba(255, 220, 249, 0.3);
+	font-family:Palatino Linotype;
+	font-size: 20px;
+	color: black;
+	border: 2px solid #ccc;
+	border-collapse:collapse;
+}
+
+#resultado-relatorio tbody tr{
+    border:1px solid red;   
+}
+
