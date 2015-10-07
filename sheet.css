@@ -110,7 +110,7 @@ height:100%;
     float:left;
     
 }
-#section {
+.section {
 	
     width:900px;
 	height: 700px;
@@ -275,3 +275,7 @@ img.clicked {
     border:1px solid red;   
 }
 
+#Respostas{
+color: black;
+font-family:Palatino Linotype;
+}
