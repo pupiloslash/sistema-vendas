@@ -245,17 +245,17 @@ img.clicked {
   font: normal medium/1.4 verdana;
 
 }
-#sumario-vendas th{
+.tabela-vendas th{
   border-collapse: collapse;
   font-size: 20px;
   width: 70%;
 }
-#sumario-vendas th, td {
+.tabela-vendas th, td {
   padding: 0.4rem;
   text-align: left;
   border: 0.3px solid #ccc;
 }
-#sumario-vendas tbody tr:nth-child(odd) {
+.tabela-vendas tbody tr:nth-child(odd) {
   background: rgba(0, 0, 0, 0.5);
 }
 
