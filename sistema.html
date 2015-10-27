@@ -1027,6 +1027,8 @@ function NomeMesToNumber(mesSelecionado){
 function MaisVendidos(){
 
 	var lista_vendidos = new Array();
+	var indice; 
+	var nome_produto;
 	
 	for(i=0; i< $('.subrow').length; i++)
 	{
@@ -1039,13 +1041,24 @@ function MaisVendidos(){
 			
 			if( date.match(/\/(.*?)\//) )
 			{	
-				lista_vendidos.push(subrow);	
+				indice = getIndexFromSubRowElement(subrow);
+				nome_produto = getProductNameFromIndex(indice);
+				
+				for( i=0; i<lista.length; i++)
+				{
+					if(lista[i]==nome_produto)
+						console.log('achei'); 
+					else 
+						lista_vendidos.push(subrow);
+				}
+					
 			}
 	}
 	for(i=0; i<lista_vendidos.length; i++)
 	{
-		var indice = getIndexFromSubRowElement(lista_vendidos[i]);
-		var nome_produto = getProductNameFromIndex(indice);
+		indice = getIndexFromSubRowElement(lista_vendidos[i]);
+		nome_produto = getProductNameFromIndex(indice);
+		
 		prod_num = i+1;
 		novaLinha = "<tr><td>"+prod_num+"</td><td>"+nome_produto+"</td><td>blah</td><td>blah</td></tr>";
 		var newRow = $(novaLinha);
