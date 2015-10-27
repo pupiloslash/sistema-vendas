@@ -64,7 +64,33 @@ $('#paginacao a:last').click(); //posiciona na nova seção criada na tabela
 }
 
 
-</script><script>
+</script>
+
+<script>
+function Tuple(/* values */) {
+    var args = Array.prototype.slice.call(arguments, 0);
+    this._store = new Array(args.length);
+    this.pack.apply(this, args);
+}
+
+Tuple.prototype.pack = function pack(/* values */) {
+    var store = this._store;
+    var i = store.length;
+
+    while (i--) {
+        store[i] = arguments[i];
+    }
+
+    return this;
+};
+
+
+Tuple.prototype.unpack = function unpack(callback) {
+    return callback.apply(this, this._store);
+};
+</script>
+
+<script>
 //salva um objeto no local storage do browser (originalmente só armazena string)
 Storage.prototype.setObj = function(key, obj) {
     return this.setItem(key, JSON.stringify(obj))
@@ -1029,6 +1055,10 @@ function MaisVendidos(){
 	var lista_vendidos = new Array();
 	var indice; 
 	var nome_produto;
+	var flag=false;
+	var teste = new Tuple("testando", 123);
+	alert(teste.unpack(function(nome, qtd){return qtd+1}))
+	
 	
 	for(i=0; i< $('.subrow').length; i++)
 	{
@@ -1044,23 +1074,40 @@ function MaisVendidos(){
 				indice = getIndexFromSubRowElement(subrow);
 				nome_produto = getProductNameFromIndex(indice);
 				
-				for( i=0; i<lista.length; i++)
+				if(lista_vendidos.length==0)
 				{
-					if(lista[i]==nome_produto)
-						console.log('achei'); 
-					else 
-						lista_vendidos.push(subrow);
+					var elemento = new Tuple(nome_produto, 1);
+					lista_vendidos.push(elemento);
+				}	
+				else{
+					for( j=0; j<lista_vendidos.length; j++)
+					{
+						nome_produto_lista = lista_vendidos[j].unpack(function(nome, qtd){return nome});
+						
+						if(nome_produto_lista==nome_produto)
+						{
+							flag = true;
+							var count = lista_vendidos[j]._store[1];
+							lista_vendidos[j]._store[1] = count+1;
+						}
+					}
+					if(!flag)
+					{
+							var elemento = new Tuple(nome_produto, 1);
+							lista_vendidos.push(elemento);
+					}
 				}
-					
+					flag = false;
 			}
 	}
 	for(i=0; i<lista_vendidos.length; i++)
 	{
-		indice = getIndexFromSubRowElement(lista_vendidos[i]);
-		nome_produto = getProductNameFromIndex(indice);
+		//indice = getIndexFromSubRowElement(lista_vendidos[i]);
+		//nome_produto = getProductNameFromIndex(indice);
 		
 		prod_num = i+1;
-		novaLinha = "<tr><td>"+prod_num+"</td><td>"+nome_produto+"</td><td>blah</td><td>blah</td></tr>";
+		novaLinha = "<tr><td>"+prod_num+"</td><td>"+lista_vendidos[i]._store[0]+"</td><td>"+
+		lista_vendidos[i]._store[1]+"</td><td>blah</td></tr>";
 		var newRow = $(novaLinha);
 		$('#mais-vendidos').append(newRow);
 	}
