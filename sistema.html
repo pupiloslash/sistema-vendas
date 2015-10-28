@@ -1056,63 +1056,84 @@ function MaisVendidos(){
 	var indice; 
 	var nome_produto;
 	var flag=false;
-	var teste = new Tuple("testando", 123);
-	alert(teste.unpack(function(nome, qtd){return qtd+1}))
 	
 	
 	for(i=0; i< $('.subrow').length; i++)
 	{
-
+		//pega data da subrow
 		subrow = $('.subrow')[i];
-
 		el = subrow.children[6];
-
 		date = el.firstElementChild.innerHTML;
-			
+		
+		//pega preço de venda da subrow
+		subrow = $('.subrow')[i];
+		el = subrow.children[8];
+		
+		sell_price = parseInt(getProductSellPrice(subrow));//parseInt(el.firstElementChild.innerHTML);
+		
+				
 			if( date.match(/\/(.*?)\//) )
 			{	
 				indice = getIndexFromSubRowElement(subrow);
 				nome_produto = getProductNameFromIndex(indice);
+				lucro_produto = sell_price - parseInt(getProductPayPrice(indice));
 				
 				if(lista_vendidos.length==0)
 				{
-					var elemento = new Tuple(nome_produto, 1);
+					var elemento = new Tuple(nome_produto, 1, lucro_produto);
 					lista_vendidos.push(elemento);
 				}	
 				else{
 					for( j=0; j<lista_vendidos.length; j++)
 					{
-						nome_produto_lista = lista_vendidos[j].unpack(function(nome, qtd){return nome});
+						nome_produto_lista = lista_vendidos[j].unpack(function(nome, qtd, lucro){return nome});
 						
 						if(nome_produto_lista==nome_produto)
 						{
 							flag = true;
 							var count = lista_vendidos[j]._store[1];
+							var lucro_medio = lista_vendidos[j]._store[2];
+							
 							lista_vendidos[j]._store[1] = count+1;
+							lista_vendidos[j]._store[2] = lucro_medio+lucro_produto;
 						}
 					}
 					if(!flag)
 					{
-							var elemento = new Tuple(nome_produto, 1);
+							var elemento = new Tuple(nome_produto, 1, lucro_produto);
 							lista_vendidos.push(elemento);
 					}
 				}
 					flag = false;
 			}
 	}
+	
+	//ordena a lista de produtos vendidos por maior quantidade vendida
+	lista_vendidos.sort(function(a,b){return b._store[1] - a._store[1] });
+	
 	for(i=0; i<lista_vendidos.length; i++)
 	{
+		qtd = lista_vendidos[i]._store[1];
 		//indice = getIndexFromSubRowElement(lista_vendidos[i]);
-		//nome_produto = getProductNameFromIndex(indice);
-		
+		//nome_produto = getProductNameFromIndex(indice);		
 		prod_num = i+1;
 		novaLinha = "<tr><td>"+prod_num+"</td><td>"+lista_vendidos[i]._store[0]+"</td><td>"+
-		lista_vendidos[i]._store[1]+"</td><td>blah</td></tr>";
+		lista_vendidos[i]._store[1]+"</td><td>R$ "+parseInt(lista_vendidos[i]._store[2]/qtd)+"</td><td>blah</td></tr>";
 		var newRow = $(novaLinha);
 		$('#mais-vendidos').append(newRow);
 	}
 }
 
+
+function ApagaMaisVendidos(){
+	body = GetTableBody('mais-vendidos')
+		
+	while( body.childElementCount > 0) 
+	{
+		tabela.deleteRow(1);
+	}
+
+}
 </script>
 
 
@@ -2724,13 +2745,15 @@ function MaisVendidos(){
 			</table>	
 			<br><br>
 			<button type="submit" id="mais-vendidos-btn" onclick="MaisVendidos()"> Ver </button>
+			<button type="submit" id="clear-mais-vendidos" onclick="ApagaMaisVendidos()"> Clear </button>
 			<table id="mais-vendidos" class="tabela-vendas"> 
 				<caption id="mais-vendidos-caption">Produtos mais Vendidos</caption>
 				<thead class="tableHead"><tr>
 						<td> Posição </td>
 						<td> Produto </td>
 						<td> Quantidade </td>
-						<td> ROI </td>
+						<td> ROI Médio</td>
+						<td> Tempo Médio</td>
 					</tr>
 				</thead>
 				<tbody>
