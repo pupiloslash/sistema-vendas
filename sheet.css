@@ -7,11 +7,17 @@ ul.img-list {
  
 ul.img-list li {
   display: inline-block;
-  height: 50px;
+  height: 70px;
   margin: 0 1em 1em 0;
   position: relative;
-  width: 70px;
-  border: 4px solid green;
+  width: 50px;
+  border: 1px solid green;
+}
+
+.thumbnail_imgs {
+height: 70px;
+width: 50px;
+background-color: transparent;
 }
 
 span.text-content {
@@ -238,6 +244,7 @@ img {
 img.clicked {
   filter: none;
   -webkit-filter: grayscale(0);
+  border: 2px solid red;
 }
 
 /* tabela relatorio */
