@@ -14,6 +14,10 @@ var tableOverflow = false;
 var vetor;
 var produtoDisponivel;
 var listafinal = $();
+semaphore=false;
+var kralho2_original = true;
+var kralho2;
+
  
 </script><script>
 function CarregaTabela(){
@@ -22,7 +26,7 @@ function CarregaTabela(){
             var rowsTotal = $('#transacoes tbody tr').length;
             var numPages = rowsTotal/rowsShown;
 			
-			if( $('#paginacao').children().length == 0 || tableOverflow ==true ){
+			if( $('#paginacao').children().length == 0 || tableOverflow ==true || semaphore==true ){
 			 $('#paginacao').children().remove();
 				for(i = 0;i < numPages;i++) {
 					var pageNum = i + 1;
@@ -30,6 +34,7 @@ function CarregaTabela(){
 				}
 				
 				tableOverflow ==false;
+				semaphore==false;
 			}
 			
             $('#transacoes tbody tr').hide();
@@ -1467,80 +1472,77 @@ function ConsultaPorStatus() {
 
 	var el = $(event.target);
 	value = el[0].value;
+	
+	if(kralho2_original)
+	{
+		tt = $("#transacoes tbody");
+		kralho2 = tt.children();	
+	}
 		
 		switch (value){	
 			case "todos":
-				alert("todos");
+				RestauraKralho2Original();			
 				break;
-			case "#":
-				alert("#");
+			case "#":		
+				semaphore=true; 	//flag que indica ao CarregaTabela() que deve ser adicionado uma nova paginação
 				
-				for(i=0; i<$('#transacoes [title="#"]').length; i++)
-				{
-					listafinal.push($('#transacoes [title="#"]')[i]);
-					listafinal.push($('#transacoes [title="#"]').next('tr')[i]);
-				}
-				CarregaTabelaMOD();
-				RenderizaTabelaOnTheFlyMOD();
+				RestauraKralho2Original(); //restaura o conjunto original de dados para a consulta ser feita
+				final_list = ConsultaConjuntoRegistros('#')			
+				RemoveTabelaResidual();
+				tt.append(final_list)				
+				kralho2_original = false;
 				break;
 			case "--":
-				alert("--");
+				semaphore=true;
+				RestauraKralho2Original();
+				final_list = ConsultaConjuntoRegistros('--')			
+				RemoveTabelaResidual();
+				tt.append(final_list)
+				kralho2_original = false;
 				break;
 			case "-":
-				alert("-");
+				semaphore=true;
+				RestauraKralho2Original();
+				final_list = ConsultaConjuntoRegistros('-')			
+				RemoveTabelaResidual();
+				tt.append(final_list)
+				kralho2_original = false;
 				break;
 		}
-
-}
-
-function CarregaTabelaMOD(){
-
-	$('#transacoes');
-            //var rowsShown = 12; //colocar numero par
-            var rowsTotal = listafinal.length;
-            var numPages = rowsTotal/rowsShown;
-			
-			if( $('#paginacao').children().length == 0 || tableOverflow ==true ){
-			 $('#paginacao').children().remove();
-				for(i = 0;i < numPages;i++) {
-					var pageNum = i + 1;
-					$('#paginacao').append('<a href="#" rel="'+i+'">'+pageNum+' </a> ');
-				}
-				
-				tableOverflow ==false;
-			}
-			
-            listafinal.hide();
-            listafinal.slice(0, rowsShown).show();
-			//$('#paginacao a[rel="' + tableIndiceClicked + '"]').addClass('active');
-            $('#paginacao a:first').addClass('active');
-				$('#paginacao a').bind('click', function(){ 
-					tableIndiceClicked = parseInt($(this)[0].getAttribute('rel'));	
-					$('#paginacao a').removeClass('active');
-					$(this).addClass('active');
-					var currPage = $(this).attr('rel');
-					var startItem = currPage * rowsShown;
-					var endItem = startItem + rowsShown;
-					listafinal.css('opacity','0.0').hide().slice(startItem, endItem).
-							css('display','table-row').animate({opacity:1}, 300);
-				});
 		
+		CarregaTabela();
+		RenderizaTabelaOnTheFly();
+
 }
 
-function RenderizaTabelaOnTheFlyMOD(){
+function ConsultaConjuntoRegistros(titulo_reg){
+	list = $('');
+	
+	for(i=0; i<$('#transacoes [title="'+titulo_reg+'"]').length; i++)
+	{
+		list.push($('#transacoes [title="'+titulo_reg+'"]')[i]);
+		list.push($('#transacoes [title="'+titulo_reg+'"]').next('tr')[i]);
+	}
+	
+	return list;
 
-/*renderiza a tabela quando o menu é navegado ou quando ocorre overflow na tabela por ex.*/
-$('#paginacao a').removeClass('active');
-var elClicado = $('#paginacao a[rel="' + tableIndiceClicked + '"]')
-elClicado.addClass('active');
-var currPage = $('#paginacao a[class="active"]').attr('rel')
-var startItem = currPage * rowsShown;
-var endItem = startItem + rowsShown;
-listafinal.css('opacity','0.0').hide().slice(startItem, endItem).
-	css('display','table-row').animate({opacity:1}, 300);					
-/*renderiza a tabela quando o menu é navegado ou quando ocorre overflow na tabela por ex.*/
-$('#paginacao a:last').click(); //posiciona na nova seção criada na tabela
 }
+
+function RestauraKralho2Original(){
+	tt = $("#transacoes tbody")
+
+	tt.children().remove()
+
+	tt.append(kralho2)
+}
+
+function RemoveTabelaResidual() {
+	tt = $("#transacoes tbody")
+
+	tt.children().remove()
+}
+
+
 </script>
 
 <div id="header">
