@@ -20,6 +20,14 @@ width: 50px;
 background-color: transparent;
 }
 
+.categorias img {
+  float: left;
+  width: 20px;
+  height: 20px;
+  background: #555;
+}
+
+
 span.text-content {
   background: rgba(0,0,0,0.5);
   color: white;
